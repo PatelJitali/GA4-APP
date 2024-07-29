@@ -103,6 +103,7 @@ const Test = () => {
           ]}
           headings={[
             'Title',
+            'Title',
           ]}
           rows={rows}
        
