@@ -1,0 +1,82 @@
+<div id="store-name" data-store-name="{{ shop.domain | escape }}"></div>
+
+<div id="headerData"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', async function () {
+    var storeNameElement = document.getElementById('store-name');
+    var storeName = storeNameElement.getAttribute('data-store-name');
+
+    async function fetchHeaderData() {
+      try {
+        if (!storeName) {
+          console.error('Shop name not found.');
+          return;
+        }
+
+        console.log('Fetching data for store:', storeName);
+
+        const response = await fetch(`https://693a-122-161-94-27.ngrok-free.app/api/header?storename=${storeName}`, {
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+            'x-api-key': 'abcdefg',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        console.log('Response data:', responseData);
+
+        const headerData = responseData;
+
+        if (Array.isArray(headerData) && headerData.length > 0) {
+          const headerDataContainer = document.getElementById('headerData');
+          headerDataContainer.innerHTML = ''; // Clear previous data
+
+          headerData.forEach((data) => {
+            console.log('Header Data Item:', data);
+
+            // Append fetchHeaderData.header directly to the head section if needed
+            if (data.title && data.body) {
+              const headerItem = document.createElement('div');
+              headerItem.className = 'header-data-item';
+              headerItem.innerHTML = `
+                {% comment %} <h3>${data.title}</h3> {% endcomment %}
+                {% comment %} <p><strong>Body:</strong> {% endcomment %}
+                 ${data.body}
+                {% comment %} </p> {% endcomment %}
+              `;
+              headerDataContainer.appendChild(headerItem);
+              console.log('Inserted into body:', data.title, data.body);
+            } else {
+              console.warn('Title or body is missing for data:', data);
+            }
+
+            // Insert fetchHeaderData.header directly to the head section if needed
+            if (data.header) {
+              document.head.insertAdjacentHTML('beforeend', data.header);
+              console.log('Inserted into head:', data.header);
+            }
+          });
+        } else {
+          console.log('No header data available or invalid format.');
+        }
+      } catch (error) {
+        console.error('Error fetching header data:', error);
+      }
+    }
+
+    fetchHeaderData();
+  });
+</script>
+
+{% schema %}
+{
+  "name": "GA4 app",
+  "target": "head",
+  "settings": [
+  ]
+}
+{% endschema %}

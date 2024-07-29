@@ -1,0 +1,28 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "1d62db3de8a271ad4b96b43e6bf8f297"
+name = "new-demo"
+handle = "new-demo-9"
+application_url = "https://bridges-geographic-operating-converted.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "learning-codecrew.myshopify.com"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = ""
+
+[auth]
+redirect_urls = [
+  "https://bridges-geographic-operating-converted.trycloudflare.com/auth/callback",
+  "https://bridges-geographic-operating-converted.trycloudflare.com/auth/shopify/callback",
+  "https://bridges-geographic-operating-converted.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-04"
+
+[pos]
+embedded = false
