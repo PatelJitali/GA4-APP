@@ -3,7 +3,7 @@
 client_id = "6b85e612339033c6a3edfd075642ff9e"
 name = "GA4 App"
 handle = "ga4-app-2"
-application_url = "https://regime-pod-washer-games.trycloudflare.com"
+application_url = "https://so-construct-reseller-display.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://regime-pod-washer-games.trycloudflare.com/auth/callback",
-  "https://regime-pod-washer-games.trycloudflare.com/auth/shopify/callback",
-  "https://regime-pod-washer-games.trycloudflare.com/api/auth/callback"
+  "https://so-construct-reseller-display.trycloudflare.com/auth/callback",
+  "https://so-construct-reseller-display.trycloudflare.com/auth/shopify/callback",
+  "https://so-construct-reseller-display.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

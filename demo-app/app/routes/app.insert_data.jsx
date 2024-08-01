@@ -1,6 +1,6 @@
 import { useNavigate } from "@remix-run/react";
-import { Button, Card, Page, TextField, Layout, PageActions } from "@shopify/polaris";
-import { useState, useEffect } from 'react';
+import { Button, Card, Page, TextField, Layout, PageActions, Toast, Frame } from "@shopify/polaris";
+import { useState, useEffect, useCallback } from 'react';
 import React from "react";
 import axios from "axios";
 import { useLoaderData } from "@remix-run/react";
@@ -18,12 +18,34 @@ const Test = () => {
     const [value, setValue] = useState('');
     const [head, setHead] = useState('');
     const [body, setBody] = useState('');
+    const [active, setActive] = useState(false);
+
+    const toggleActive = useCallback(() => {
+        setActive((active) => !active);
+    }, []);
+
+    useEffect(() => {
+        let timer;
+        if (active) {
+            timer = setTimeout(() => {
+                setActive(false);
+                navigate('/app/display_data');
+            }, 1500);
+        }
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [active]);
+
+    const toastMarkup = active ? (
+        <Toast content="Insert Data Successfully" onDismiss={toggleActive} />
+    ) : null;
 
     async function headerSubmit() {
         console.log(value, head, body, shopName1.shop, 'posted data');
         try {
             const response = await axios.post(
-                `https://693a-122-161-94-27.ngrok-free.app/api/header`,
+                `https://bba5-110-226-19-196.ngrok-free.app/api/header`,
                 {
                     title: value,
                     header: head,
@@ -38,7 +60,7 @@ const Test = () => {
                 }
             );
             console.log(response.data);
-            navigate('/app/display_data');
+            setActive(true);
         } catch (error) {
             console.log(error);
         }
@@ -49,52 +71,55 @@ const Test = () => {
     }
 
     return (
-        <Page
-            backAction={{ content: 'Settings', onAction: back }}
-            title={`Add new code for ${shopName1.shop}`} // Display shop name in the title
-            primaryAction={{ content: 'Save', onAction: headerSubmit }}
-        >
-            <Layout>
-                <Layout.Section>
-                    <Card roundedAbove="sm">
-                        <TextField
-                            label="Subject Title"
-                            value={value}
-                            onChange={(value) => setValue(value)}
-                            autoComplete="off"
+        <Frame>
+            <Page
+                backAction={{ content: 'Settings', onAction: back }}
+                title={`Add New Code`} // Display shop name in the title
+                primaryAction={{ content: 'Save', onAction: headerSubmit }}
+            >
+                <Layout>
+                    <Layout.Section>
+                        <Card roundedAbove="sm">
+                            <TextField
+                                label="Subject Title"
+                                value={value}
+                                onChange={(value) => setValue(value)}
+                                autoComplete="off"
+                            />
+                        </Card>
+                    </Layout.Section>
+                    <Layout.Section>
+                        <Card roundedAbove="sm">
+                            <TextField
+                                label="Code in the header"
+                                value={head}
+                                onChange={(value) => setHead(value)}
+                                multiline={14}
+                                helpText="The code will be printed in the <head> section."
+                                autoComplete="off"
+                            />
+                        </Card>
+                    </Layout.Section>
+                    <Layout.Section>
+                        <Card roundedAbove="sm">
+                            <TextField
+                                label="Code in the body"
+                                value={body}
+                                onChange={(value) => setBody(value)}
+                                multiline={14}
+                                helpText="The code will be printed above the </body> tag."
+                                autoComplete="off"
+                            />
+                        </Card>
+                        <PageActions
+                            primaryAction={{ content: 'Save', onAction: headerSubmit }}
+                            secondaryActions={{ content: 'Cancel', onAction: back }}
                         />
-                    </Card>
-                </Layout.Section>
-                <Layout.Section>
-                    <Card roundedAbove="sm">
-                        <TextField
-                            label="Code in the header"
-                            value={head}
-                            onChange={(value) => setHead(value)}
-                            multiline={14}
-                            helpText="The code will be printed in the <head> section."
-                            autoComplete="off"
-                        />
-                    </Card>
-                </Layout.Section>
-                <Layout.Section>
-                    <Card roundedAbove="sm">
-                        <TextField
-                            label="Code in the body"
-                            value={body}
-                            onChange={(value) => setBody(value)}
-                            multiline={14}
-                            helpText="The code will be printed above the </body> tag."
-                            autoComplete="off"
-                        />
-                    </Card>
-                    <PageActions
-                        primaryAction={{ content: 'Save', onAction: headerSubmit }}
-                        secondaryActions={{ content: 'Cancel', onAction: back }}
-                    />
-                </Layout.Section>
-            </Layout>
-        </Page>
+                    </Layout.Section>
+                </Layout>
+            </Page>
+            {toastMarkup}
+        </Frame>
     );
 };
 

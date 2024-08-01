@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Button,
@@ -9,11 +9,15 @@ import {
   EmptyState,
   Layout,
   Banner,
-  LegacyCard, 
+  LegacyCard,
   DataTable,
+  Pagination,
+  Frame,
+  Modal,
+  TextContainer,
+  Toast
 } from "@shopify/polaris";
-import { useLoaderData } from "@remix-run/react";
-import { useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate, useLocation } from "@remix-run/react";
 import axios from "axios";
 import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { authenticate } from "../shopify.server";
@@ -25,27 +29,37 @@ export const loader = async ({ request }) => {
 
 const Test = () => {
   const shopName1 = useLoaderData();
-
   const navigate = useNavigate();
+  const location = useLocation();
   const [data, setData] = useState([]);
   const [showBanner, setShowBanner] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [modalActive, setModalActive] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [toastActive, setToastActive] = useState(false);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    // Set globalShopName when shopName1 changes
     window.globalShopName = shopName1.shop;
     console.log("Global Shop Name:", window.globalShopName); // Log the global shop name
     headerData();
   }, [shopName1.shop]);
 
   useEffect(() => {
-    // Store shopName in localStorage when it changes
     localStorage.setItem('shopName', shopName1.shop);
   }, [shopName1.shop]);
+
+  useEffect(() => {
+    if (location.state && location.state.updated) {
+      setToastActive(true);
+      window.history.replaceState({}, document.title); // Clear state
+    }
+  }, [location]);
 
   async function headerData() {
     try {
       const response = await axios.get(
-        `https://693a-122-161-94-27.ngrok-free.app/api/header?storename=${shopName1.shop}`,
+        `https://bba5-110-226-19-196.ngrok-free.app/api/header?storename=${shopName1.shop}`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true',
@@ -67,7 +81,7 @@ const Test = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://693a-122-161-94-27.ngrok-free.app/api/header/${id}`, {
+      await axios.delete(`https://bba5-110-226-19-196.ngrok-free.app/api/header/${id}`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
           'x-api-key': 'abcdefg',
@@ -79,114 +93,134 @@ const Test = () => {
     }
   };
 
-  const rows = [
-    ['Emerald Silk Gown', '$875.00', 124689, 140, '$122,500.00'],
-    ['Mauve Cashmere Scarf', '$230.00', 124533, 83, '$19,090.00'],
-    [
-      'Navy Merino Wool Blazer with khaki chinos and yellow belt',
-      '$445.00',
-      124518,
-      32,
-      '$14,240.00',
-    ],
-  ];
+  const handleDeleteClick = (id) => {
+    setItemToDelete(id);
+    setModalActive(true);
+  };
+
+  const handleModalChange = useCallback(() => setModalActive(!modalActive), [modalActive]);
+
+  const handleConfirmDelete = async () => {
+    if (itemToDelete) {
+      await handleDelete(itemToDelete);
+      setModalActive(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+
+  const rows = currentItems.map(item => [
+    <Text variant="bodyMd">{item.title}</Text>,
+    <Button size="slim" icon={EditIcon} onClick={() => handleEdit(item._id)}>Edit</Button>,
+    <Button size="slim" icon={DeleteIcon} onClick={() => handleDeleteClick(item._id)} destructive>Delete</Button>
+  ]);
+
+  const toggleToastActive = useCallback(() => setToastActive((active) => !active), []);
+
+  const toastMarkup = toastActive ? (
+    <Toast content="Update Data Successfully" onDismiss={toggleToastActive} />
+  ) : null;
+
   return (
-    <Page>
-       <LegacyCard>
-        <DataTable
-          columnContentTypes={[
-            'text',
-            'numeric',
-            'numeric',
-            'numeric',
-            'numeric',
-          ]}
-          headings={[
-            'Title',
-            'Title',
-          ]}
-          rows={rows}
-       
-          pagination={{
-            hasNext: true,
-            onNext: () => {},
-          }}
-        />
-      </LegacyCard>
-      <Layout>
-        <Layout.Section>
-          <InlineStack align="space-between">
-            <Text variant="headingXl" as="h4" alignment="start">
-              Insert Code
-            </Text>
-            <Button variant="primary" onClick={() => navigate("/app/insert_data")}>
-              Add Script
-            </Button>
-          </InlineStack>
-        </Layout.Section>
-        <Layout.Section>
-          {showBanner && (
-            <Banner
-              title="Enable App Embed"
-              onDismiss={() => setShowBanner(false)}
-            >
-              <InlineStack align="space-between">
-                <Box>
-                  <Text as="p">
-                    Please make sure that the app is enabled from the Shopify
-                    customization.
-                  </Text>
-                </Box>
-                <Box>
-                  <Button
-                    url={`https://${shopName1.shop}/admin/themes/current/editor?context=apps`}
-                    target="_blank"
-                  >
-                    Enable App Embed
-                  </Button>
-                </Box>
-              </InlineStack>
-            </Banner>
-          )}
-        </Layout.Section>
-        <Layout.Section>
-          {data.length === 0 ? (
-            <Card>
-              <EmptyState
-                heading="You don't have any code"
-                image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+    <Frame>
+      <Page>
+        <Layout>
+          <Layout.Section>
+            <InlineStack align="space-between">
+              <Text variant="headingXl" as="h4" alignment="start">
+                Display Data
+              </Text>
+              <Button variant="primary" onClick={() => navigate("/app/insert_data")}>
+                Add Script
+              </Button>
+            </InlineStack>
+          </Layout.Section>
+          <Layout.Section>
+            {showBanner && (
+              <Banner
+                title="Enable App Embed"
+                onDismiss={() => setShowBanner(false)}
               >
-                <p>Once you have a code it will display on this page.</p>
-              </EmptyState>
-            </Card>
-          ) : (
-            <Card roundedAbove="sm">
-              {data.map((item, index) => (
-                <div key={index}>
-                  <Page
-                    title={item.title}
-                    secondaryActions={[
-                      {
-                        content: 'Edit',
-                        icon: EditIcon,
-                        onAction: () => handleEdit(item._id)
-                      },
-                      {
-                        content: 'Delete',
-                        destructive: true,
-                        icon: DeleteIcon,
-                        onAction: () => handleDelete(item._id)
-                      }
-                    ]}
-                  />
-                </div>
-                
-              ))}
-            </Card>
-          )}
-        </Layout.Section>
-      </Layout>
-    </Page>
+                <InlineStack align="space-between">
+                  <Box>
+                    <Text as="p">
+                      Please make sure that the app is enabled from the Shopify
+                      customization.
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Button
+                      url={`https://${shopName1.shop}/admin/themes/current/editor?context=apps`}
+                      target="_blank"
+                    >
+                      Enable App Embed
+                    </Button>
+                  </Box>
+                </InlineStack>
+              </Banner>
+            )}
+          </Layout.Section>
+          <Layout.Section>
+            <LegacyCard>
+              <DataTable
+                columnContentTypes={[
+                  'text',
+                  'text',
+                  'text',
+                ]}
+                headings={[
+                  <Text variant="bodyMd" fontWeight="bold">Title</Text>,
+                  <Text variant="bodyMd" fontWeight="bold">Action</Text>,
+                  <Text variant="bodyMd" fontWeight="bold"></Text>,
+                ]}
+                rows={rows}
+                hideScrollIndicator
+              />
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '16px 0'
+              }}>
+                <Pagination
+                  label={`Page ${currentPage} of ${Math.ceil(data.length / itemsPerPage)}`}
+                  hasPrevious={currentPage > 1}
+                  onPrevious={() => setCurrentPage(prev => prev - 1)}
+                  hasNext={indexOfLastItem < data.length}
+                  onNext={() => setCurrentPage(prev => prev + 1)}
+                />
+              </div>
+            </LegacyCard>
+          </Layout.Section>
+        </Layout>
+
+        <Modal
+          open={modalActive}
+          onClose={handleModalChange}
+          title="Confirm Deletion"
+          primaryAction={{
+            content: 'Delete',
+            onAction: handleConfirmDelete,
+            destructive: true,
+          }}
+          secondaryActions={[
+            {
+              content: 'Cancel',
+              onAction: handleModalChange,
+            },
+          ]}
+        >
+          <Modal.Section>
+            <TextContainer>
+              <p>Are you sure you want to delete this item?</p>
+            </TextContainer>
+          </Modal.Section>
+        </Modal>
+        {toastMarkup}
+      </Page>
+    </Frame>
   );
 };
 
