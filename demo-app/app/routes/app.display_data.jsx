@@ -37,6 +37,7 @@ const Test = () => {
   const [modalActive, setModalActive] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [toastActive, setToastActive] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Loading state
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -59,7 +60,7 @@ const Test = () => {
   async function headerData() {
     try {
       const response = await axios.get(
-        `https://bba5-110-226-19-196.ngrok-free.app/api/header?storename=${shopName1.shop}`,
+        `https://dd4a-122-173-67-91.ngrok-free.app/api/header?storename=${shopName1.shop}`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true',
@@ -67,9 +68,17 @@ const Test = () => {
           },
         }
       );
-      setData(response.data);
+  
+      // Check if response.data is an array
+      if (Array.isArray(response.data)) {
+        setData(response.data);
+      } else {
+        console.error("Error: Data fetched is not an array:", response.data);
+        setData([]); // Set to empty array to avoid map error
+      }
     } catch (error) {
       console.error("Error fetching header data:", error);
+      setData([]); // Set to empty array to avoid map error
     }
   }
 
@@ -81,13 +90,13 @@ const Test = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://bba5-110-226-19-196.ngrok-free.app/api/header/${id}`, {
+      await axios.delete(`https://dd4a-122-173-67-91.ngrok-free.app/api/header/${id}`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
           'x-api-key': 'abcdefg',
         }
       });
-      headerData();
+      headerData(); // Refresh data
     } catch (error) {
       console.error("Error deleting item:", error);
     }
@@ -102,26 +111,41 @@ const Test = () => {
 
   const handleConfirmDelete = async () => {
     if (itemToDelete) {
-      await handleDelete(itemToDelete);
-      setModalActive(false);
-      setItemToDelete(null);
+      setIsLoading(true); // Set loading state to true
+
+      try {
+        await handleDelete(itemToDelete);
+        // Delay showing the toast to ensure loading state is visible
+        setTimeout(() => {
+          setToastActive(true); // Show toast message
+        }, 500); // Adjust timeout duration as needed
+      } catch (error) {
+        console.error("Error deleting item:", error);
+      } finally {
+        // Delay turning off the loading state
+        setTimeout(() => {
+          setIsLoading(false); // Set loading state to false
+        }, 1500); // Adjust timeout duration as needed
+        setModalActive(false);
+        setItemToDelete(null);
+      }
     }
   };
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = Array.isArray(data) ? data.slice(indexOfFirstItem, indexOfLastItem) : [];
 
-  const rows = currentItems.map(item => [
+  const rows = Array.isArray(currentItems) ? currentItems.map(item => [
     <Text variant="bodyMd">{item.title}</Text>,
     <Button size="slim" icon={EditIcon} onClick={() => handleEdit(item._id)}>Edit</Button>,
     <Button size="slim" icon={DeleteIcon} onClick={() => handleDeleteClick(item._id)} destructive>Delete</Button>
-  ]);
+  ]) : [];
 
   const toggleToastActive = useCallback(() => setToastActive((active) => !active), []);
 
   const toastMarkup = toastActive ? (
-    <Toast content="Update Data Successfully" onDismiss={toggleToastActive} />
+    <Toast content="Delete Data Successfully" onDismiss={toggleToastActive} />
   ) : null;
 
   return (
@@ -165,33 +189,46 @@ const Test = () => {
           </Layout.Section>
           <Layout.Section>
             <LegacyCard>
-              <DataTable
-                columnContentTypes={[
-                  'text',
-                  'text',
-                  'text',
-                ]}
-                headings={[
-                  <Text variant="bodyMd" fontWeight="bold">Title</Text>,
-                  <Text variant="bodyMd" fontWeight="bold">Action</Text>,
-                  <Text variant="bodyMd" fontWeight="bold"></Text>,
-                ]}
-                rows={rows}
-                hideScrollIndicator
-              />
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                padding: '16px 0'
-              }}>
-                <Pagination
-                  label={`Page ${currentPage} of ${Math.ceil(data.length / itemsPerPage)}`}
-                  hasPrevious={currentPage > 1}
-                  onPrevious={() => setCurrentPage(prev => prev - 1)}
-                  hasNext={indexOfLastItem < data.length}
-                  onNext={() => setCurrentPage(prev => prev + 1)}
-                />
-              </div>
+              {data.length === 0 ? (
+                <Card>
+                  <EmptyState
+                    heading="You don't have any code"
+                    image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                  >
+                    <p>Once you have a code it will display on this page.</p>
+                  </EmptyState>
+                </Card>
+              ) : (
+                <>
+                  <DataTable
+                    columnContentTypes={[
+                      'text',
+                      'text',
+                      'text',
+                    ]}
+                    headings={[
+                      <Text variant="bodyMd" fontWeight="bold">Title</Text>,
+                      <Text variant="bodyMd" fontWeight="bold">Action</Text>,
+                      <Text variant="bodyMd" fontWeight="bold"></Text>,
+                    ]}
+                    rows={rows}
+                    hideScrollIndicator
+                  />
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    padding: '16px 0'
+                  }}>
+                    <Pagination
+                      label={`Page ${currentPage} of ${Math.ceil((Array.isArray(data) ? data.length : 0) / itemsPerPage)}`}
+                      hasPrevious={currentPage > 1}
+                      onPrevious={() => setCurrentPage(prev => prev - 1)}
+                      hasNext={indexOfLastItem < (Array.isArray(data) ? data.length : 0)}
+                      onNext={() => setCurrentPage(prev => prev + 1)}
+                    />
+                  </div>
+                </>
+              )}
             </LegacyCard>
           </Layout.Section>
         </Layout>
@@ -204,6 +241,7 @@ const Test = () => {
             content: 'Delete',
             onAction: handleConfirmDelete,
             destructive: true,
+            loading: isLoading // Add loading indicator to the button
           }}
           secondaryActions={[
             {

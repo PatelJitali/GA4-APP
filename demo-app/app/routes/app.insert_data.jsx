@@ -19,11 +19,14 @@ const Test = () => {
     const [head, setHead] = useState('');
     const [body, setBody] = useState('');
     const [active, setActive] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [valueError, setValueError] = useState('');
+    const [headError, setHeadError] = useState('');
 
     const toggleActive = useCallback(() => {
         setActive((active) => !active);
     }, []);
-
+   
     useEffect(() => {
         let timer;
         if (active) {
@@ -42,15 +45,26 @@ const Test = () => {
     ) : null;
 
     async function headerSubmit() {
+        if (!value) {
+            setValueError('Subject Title is required');
+            return;
+        }
+        if (!head) {
+            setHeadError('Code in the header is required');
+            return;
+        }
         console.log(value, head, body, shopName1.shop, 'posted data');
+        setIsLoading(true); 
+        shopify.loading(true); 
+    
         try {
             const response = await axios.post(
-                `https://bba5-110-226-19-196.ngrok-free.app/api/header`,
+                `https://dd4a-122-173-67-91.ngrok-free.app/api/header`,
                 {
                     title: value,
                     header: head,
                     body: body,
-                    storename: shopName1.shop // Pass shop name in the request
+                    storename: shopName1.shop
                 },
                 {
                     headers: {
@@ -60,9 +74,17 @@ const Test = () => {
                 }
             );
             console.log(response.data);
-            setActive(true);
+            setTimeout(() => {
+                setActive(true);
+            }, 500);
+    
         } catch (error) {
             console.log(error);
+        } finally {
+            setTimeout(() => {
+                setIsLoading(false); 
+                shopify.loading(false); 
+            }, 1500); 
         }
     }
 
@@ -74,7 +96,7 @@ const Test = () => {
         <Frame>
             <Page
                 backAction={{ content: 'Settings', onAction: back }}
-                title={`Add New Code`} // Display shop name in the title
+                title={`Add New Code`}
                 primaryAction={{ content: 'Save', onAction: headerSubmit }}
             >
                 <Layout>
@@ -83,8 +105,12 @@ const Test = () => {
                             <TextField
                                 label="Subject Title"
                                 value={value}
-                                onChange={(value) => setValue(value)}
+                                onChange={(value) => {
+                                    setValue(value);
+                                    if (value) setValueError('');
+                                }}
                                 autoComplete="off"
+                                error={valueError}
                             />
                         </Card>
                     </Layout.Section>
@@ -93,17 +119,21 @@ const Test = () => {
                             <TextField
                                 label="Code in the header"
                                 value={head}
-                                onChange={(value) => setHead(value)}
+                                onChange={(value) => {
+                                    setHead(value);
+                                    if (value) setHeadError('');
+                                }}
                                 multiline={14}
                                 helpText="The code will be printed in the <head> section."
                                 autoComplete="off"
+                                error={headError}
                             />
                         </Card>
                     </Layout.Section>
                     <Layout.Section>
                         <Card roundedAbove="sm">
                             <TextField
-                                label="Code in the body"
+                                label="Code in the body (optional)"
                                 value={body}
                                 onChange={(value) => setBody(value)}
                                 multiline={14}
@@ -112,7 +142,7 @@ const Test = () => {
                             />
                         </Card>
                         <PageActions
-                            primaryAction={{ content: 'Save', onAction: headerSubmit }}
+                            primaryAction={{ content: 'Save', onAction: headerSubmit, disabled: isLoading }}
                             secondaryActions={{ content: 'Cancel', onAction: back }}
                         />
                     </Layout.Section>

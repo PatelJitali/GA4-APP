@@ -27,10 +27,7 @@ export default function App() {
           Home
         </Link>
       
-        <Link to="/app/display_data">Configuration List</Link>
-        <Link to="/app/insert_data">Insert Data</Link>
-      
-
+        <Link to="/app/display_data">Configuration List</Link>    
       </ui-nav-menu>
       <Outlet />
     </AppProvider>
