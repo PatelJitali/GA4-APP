@@ -29,7 +29,7 @@ const Edit = () => {
         (async function fetchHeaderData() {
             try {
                 const response = await axios.get(
-                    `https://74c8-106-215-34-180.ngrok-free.appapi/header/${id}`,
+                    `https://74c8-106-215-34-180.ngrok-free.app/api/header/${id}`,
                     {
                         headers: {
                             'ngrok-skip-browser-warning': 'true',
@@ -85,7 +85,7 @@ const Edit = () => {
 
         try {
             await axios.put(
-                `https://74c8-106-215-34-180.ngrok-free.appapi/header/${id}`,
+                `https://74c8-106-215-34-180.ngrok-free.app/api/header/${id}`,
                 {
                     title: editValue,
                     header: editHead,

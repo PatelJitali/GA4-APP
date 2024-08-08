@@ -3,7 +3,7 @@
 client_id = "6b85e612339033c6a3edfd075642ff9e"
 name = "GA4 App"
 handle = "ga4-app-2"
-application_url = "https://advertisements-aquatic-households-between.trycloudflare.com"
+application_url = "https://periods-cards-defense-laptops.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://advertisements-aquatic-households-between.trycloudflare.com/auth/callback",
-  "https://advertisements-aquatic-households-between.trycloudflare.com/auth/shopify/callback",
-  "https://advertisements-aquatic-households-between.trycloudflare.com/api/auth/callback"
+  "https://periods-cards-defense-laptops.trycloudflare.com/auth/callback",
+  "https://periods-cards-defense-laptops.trycloudflare.com/auth/shopify/callback",
+  "https://periods-cards-defense-laptops.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
