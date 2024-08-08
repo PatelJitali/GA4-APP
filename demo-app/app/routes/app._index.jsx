@@ -9,7 +9,8 @@ import {
   BlockStack,
   Button,
 } from "@shopify/polaris";
-// import main_whatsapp from "../assets/whatsapp_banner.png";
+import main_ScriptInjector from "../assets/ScriptInjector_logo.png";
+import head_ScriptInjector from "../assets/ScriptInjector.png";
 import { useLoaderData } from "@remix-run/react";
 import { apiVersion, authenticate } from "../shopify.server";
 import { useEffect, useState } from "react";
@@ -95,14 +96,14 @@ export default function FirstPagePage() {
                   </Box>
                   <Box paddingBlockStart="100">
                     <Text as="p" variant="bodyLg">
-                      Welcome to GA4 App
+                      Welcome to ScriptInjector App
                     </Text>
                   </Box>
                 </Box>
                 <img
-                  src="https://cc-app-store.myshopify.com/cdn/shop/files/Synergy_ZR01_-_Made_with_PosterMyWall.jpg?v=1718617479&width=1780"
-                  alt="ChatNest"
-                  style={{ maxWidth: 70, height: 70, marginRight: "20px" }}
+                  src={head_ScriptInjector}
+                  alt="ScriptInjector"
+                  style={{ maxWidth: 100, height: 70, marginRight: "20px", borderRadius: "50%" }}
                 />
               </>
             </Box>
@@ -115,8 +116,8 @@ export default function FirstPagePage() {
                 <Box>
                   <InlineStack align="center">
                     <img
-                      src="https://cc-app-store.myshopify.com/cdn/shop/files/Synergy_ZR01_-_Made_with_PosterMyWall.jpg?v=1718617479&width=1780"
-                      alt="main_whatsapp"
+                      src={main_ScriptInjector}
+                      alt="main_ScriptInjectorp"
                       style={{
                         width: 150,
                         height: 150,
@@ -130,7 +131,7 @@ export default function FirstPagePage() {
                 <Box paddingBlockStart="500">
                   <InlineStack align="center">
                     <Text as="h2" variant="headingLg">
-                      Welcome to GA4 App
+                      Welcome to ScriptInjector App
                     </Text>
                   </InlineStack>
                 </Box>
@@ -138,7 +139,7 @@ export default function FirstPagePage() {
                   <InlineStack align="center">
                     <Text as="p" variant="bodyLg">
                       Track and analyze user behavior across your website 
-                      and app with Google Analytics 4 for advanced 
+                      and app with ScriptInjector for advanced 
                       insights and optimization.
                     </Text>
                   </InlineStack>

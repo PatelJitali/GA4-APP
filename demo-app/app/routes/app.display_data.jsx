@@ -60,7 +60,7 @@ const Test = () => {
   async function headerData() {
     try {
       const response = await axios.get(
-        `https://dd4a-122-173-67-91.ngrok-free.app/api/header?storename=${shopName1.shop}`,
+        `https://74c8-106-215-34-180.ngrok-free.appapi/header?storename=${shopName1.shop}`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true',
@@ -90,7 +90,7 @@ const Test = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://dd4a-122-173-67-91.ngrok-free.app/api/header/${id}`, {
+      await axios.delete(`https://74c8-106-215-34-180.ngrok-free.appapi/header/${id}`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
           'x-api-key': 'abcdefg',
@@ -151,6 +151,7 @@ const Test = () => {
   return (
     <Frame>
       <Page>
+      <ui-title-bar title="Configuration Data"></ui-title-bar>
         <Layout>
           <Layout.Section>
             <InlineStack align="space-between">
