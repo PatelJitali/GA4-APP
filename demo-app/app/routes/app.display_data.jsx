@@ -60,7 +60,7 @@ const Test = () => {
   async function headerData() {
     try {
       const response = await axios.get(
-        `https://74c8-106-215-34-180.ngrok-free.app/api/header?storename=${shopName1.shop}`,
+        `https://8008-122-166-143-212.ngrok-free.app/api/header?storename=${shopName1.shop}`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true',
@@ -90,7 +90,7 @@ const Test = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://74c8-106-215-34-180.ngrok-free.app/api/header/${id}`, {
+      await axios.delete(`https://8008-122-166-143-212.ngrok-free.app/api/header/${id}`, {
         headers: {
           'ngrok-skip-browser-warning': 'true',
           'x-api-key': 'abcdefg',
