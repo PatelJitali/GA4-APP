@@ -15,7 +15,7 @@
 
         console.log('Fetching data for store:', storeName);
 
-        const response = await fetch(`https://8008-122-166-143-212.ngrok-free.app/api/header?storename=${storeName}`, {
+        const response = await fetch(`https://1acd-223-235-175-161.ngrok-free.appapi/header?storename=${storeName}`, {
           headers: {
             'ngrok-skip-browser-warning': 'true',
             'x-api-key': 'abcdefg',
@@ -39,17 +39,16 @@
             console.log('Header Data Item:', data);
 
             // Append fetchHeaderData.header directly to the head section if needed
-            if (data.title && data.body) {
+            if (data.title && data.body && data.head) {
               const headerItem = document.createElement('div');
               headerItem.className = 'header-data-item';
               headerItem.innerHTML = `
-                {% comment %} <h3>${data.title}</h3> {% endcomment %}
-                {% comment %} <p><strong>Body:</strong> {% endcomment %}
+              ${data.head}
+                 ${data.title}
                  ${data.body}
-                {% comment %} </p> {% endcomment %}
               `;
               headerDataContainer.appendChild(headerItem);
-              console.log('Inserted into body:', data.title, data.body);
+              console.log('Inserted into body:', data.title, data.body, data.head);
             } else {
               console.warn('Title or body is missing for data:', data);
             }

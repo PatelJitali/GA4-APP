@@ -3,7 +3,7 @@
 client_id = "6b85e612339033c6a3edfd075642ff9e"
 name = "GA4 App"
 handle = "ga4-app-2"
-application_url = "https://sage-sugar-working-questionnaire.trycloudflare.com"
+application_url = "https://action-was-cgi-entitled.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://sage-sugar-working-questionnaire.trycloudflare.com/auth/callback",
-  "https://sage-sugar-working-questionnaire.trycloudflare.com/auth/shopify/callback",
-  "https://sage-sugar-working-questionnaire.trycloudflare.com/api/auth/callback"
+  "https://action-was-cgi-entitled.trycloudflare.com/auth/callback",
+  "https://action-was-cgi-entitled.trycloudflare.com/auth/shopify/callback",
+  "https://action-was-cgi-entitled.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
