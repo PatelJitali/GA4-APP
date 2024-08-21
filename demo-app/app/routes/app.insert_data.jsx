@@ -6,6 +6,7 @@ import axios from "axios";
 import { useLoaderData } from "@remix-run/react";
 import { authenticate } from "../shopify.server";
 
+
 export const loader = async ({ request }) => {
     const { session } = await authenticate.admin(request);
     return session;
@@ -59,7 +60,7 @@ const Test = () => {
     
         try {
             const response = await axios.post(
-                `https://74c8-106-215-34-180.ngrok-free.appapi/header`,
+                `https://b873-122-170-56-160.ngrok-free.app/api/header`,
                 {
                     title: value,
                     header: head,
