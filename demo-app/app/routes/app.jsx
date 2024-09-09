@@ -13,6 +13,7 @@ export const loader = async ({ request }) => {
   return json({ apiKey: process.env.SHOPIFY_API_KEY || "", shopDomain: session.shop });
 };
 
+
 export default function App() {
 
   const { apiKey, shopDomain } = useLoaderData();

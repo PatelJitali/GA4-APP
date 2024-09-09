@@ -14,7 +14,6 @@ import head_ScriptInjector from "../assets/ScriptInjector.png";
 import { useLoaderData } from "@remix-run/react";
 import { apiVersion, authenticate } from "../shopify.server";
 import { useEffect, useState } from "react";
-// import Logo from "../assets/logo.png";
 
 export const loader = async ({ request }) => {
   try {
