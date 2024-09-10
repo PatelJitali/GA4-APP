@@ -1,5 +1,5 @@
-import { useNavigate, useActionData, Form } from "@remix-run/react";
-import { Button, Card, Page, TextField, Layout, PageActions, Toast, Frame } from "@shopify/polaris";
+import { useNavigate, useActionData, Form, useSubmit  } from "@remix-run/react";
+import { Button, Card, Page, TextField, Layout, PageActions, Toast, Frame, ContextualSaveBar  } from "@shopify/polaris";
 import { useState, useEffect, useCallback } from 'react';
 import React from "react";
 import axios from "axios";
@@ -24,7 +24,7 @@ export const action = async ({ request }) => {
     try {
         // Your existing API call
         const headerData = await axios.post(
-            `https://1222-110-225-99-87.ngrok-free.app/api/header`,
+            `https://62d8-110-227-227-11.ngrok-free.app/api/header`,
             {
                 title: value,
                 header: head,
@@ -55,7 +55,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch script data
-        const scriptData = await fetch(`https://1222-110-225-99-87.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://62d8-110-227-227-11.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -96,10 +96,9 @@ export const action = async ({ request }) => {
 
 const Test = () => {
     const  shopName1  = useLoaderData();
-    const actionData = useActionData();
-    
+    const actionData = useActionData();    
     const navigate = useNavigate();
-
+    const submit = useSubmit();
     const [value, setValue] = useState('');
     const [head, setHead] = useState('');
     const [body, setBody] = useState('');
@@ -107,6 +106,8 @@ const Test = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [valueError, setValueError] = useState('');
     const [headError, setHeadError] = useState('');
+    const [isDirty, setIsDirty] = useState(false);
+    const [initialData, setInitialData] = useState({ value: '', head: '', body: '' });
 
     const toggleActive = useCallback(() => {
         setActive((active) => !active);
@@ -115,6 +116,7 @@ const Test = () => {
     useEffect(() => {
         if (actionData?.success) {
             setActive(true);
+            setIsDirty(false);
             const timer = setTimeout(() => {
                 setActive(false);
                 navigate('/app/display_data');
@@ -123,22 +125,65 @@ const Test = () => {
         }
     }, [actionData, navigate]);
 
+    useEffect(() => {
+        setInitialData({ value, head, body });
+    }, []); // Set initial data only once when component mounts
+
+    useEffect(() => {
+        const isDataChanged = 
+            value !== initialData.value ||
+            head !== initialData.head ||
+            body !== initialData.body;
+        setIsDirty(isDataChanged);
+    }, [value, head, body, initialData]);
+
     const toastMarkup = active ? (
         <Toast content="Insert Data Successfully" onDismiss={toggleActive} />
     ) : null;
 
-    function handleSubmit(event) {
+   
+    function validateForm() {
+        let isValid = true;
         if (!value) {
             setValueError('Subject Title is required');
-            event.preventDefault();
-            return;
+            isValid = false;
+        } else {
+            setValueError('');
         }
         if (!head) {
             setHeadError('Code in the header is required');
-            event.preventDefault();
-            return;
+            isValid = false;
+        } else {
+            setHeadError('');
         }
-        setIsLoading(true);
+        return isValid;
+    }
+
+    function handleSubmit(event) {
+        event.preventDefault();
+        if (validateForm()) {
+            setIsLoading(true);
+            submit(event.currentTarget, { method: 'post' });
+        }
+    }
+
+    function handleSave() {
+        if (validateForm()) {
+            setIsLoading(true);
+            const formData = new FormData();
+            formData.append('value', value);
+            formData.append('head', head);
+            formData.append('body', body);
+            formData.append('shopName', shopName1.shop);
+            submit(formData, { method: 'post' });
+        }
+    }
+
+    function handleDiscard() {
+        setValue(initialData.value);
+        setHead(initialData.head);
+        setBody(initialData.body);
+        setIsDirty(false);
     }
 
     function back() {
@@ -147,6 +192,19 @@ const Test = () => {
 
     return (
         <Frame>
+            {isDirty && (
+                <ContextualSaveBar
+                    message="Unsaved changes"
+                    saveAction={{
+                        onAction: handleSave,
+                        loading: isLoading,
+                        disabled: isLoading,
+                    }}
+                    discardAction={{
+                        onAction: handleDiscard,
+                    }}
+                />
+            )}
             <Page
                 backAction={{ content: 'Settings', onAction: back }}
                 title={`Add New Code`}

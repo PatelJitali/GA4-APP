@@ -41,7 +41,7 @@ export const action = async ({ request }) => {
   const id = formData.get("id");
 
   try {
-    await axios.delete(`https://1222-110-225-99-87.ngrok-free.app/api/header/${id}`, {
+    await axios.delete(`https://62d8-110-227-227-11.ngrok-free.app/api/header/${id}`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'x-api-key': 'abcdefg',
@@ -63,7 +63,7 @@ export const action = async ({ request }) => {
   const shopData = responseBody.data.shop;
 
   // Fetch updated script data
-  const scriptData = await fetch(`https://1222-110-225-99-87.ngrok-free.app/api/header?storename=${session.shop}`, {
+  const scriptData = await fetch(`https://62d8-110-227-227-11.ngrok-free.app/api/header?storename=${session.shop}`, {
       headers: {
           'ngrok-skip-browser-warning': 'true',
           'x-api-key': 'abcdefg',
@@ -122,6 +122,7 @@ const Test = () => {
   const [toastActive, setToastActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
+  
 
   useEffect(() => {
     window.globalShopName = shopName1.shop;
@@ -149,7 +150,7 @@ const Test = () => {
   async function headerData() {
     try {
       const response = await axios.get(
-        `https://1222-110-225-99-87.ngrok-free.app/api/header?storename=${shopName1.shop}`,
+        `https://62d8-110-227-227-11.ngrok-free.app/api/header?storename=${shopName1.shop}`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true',
@@ -189,25 +190,34 @@ const Test = () => {
       setIsLoading(true);
       const formData = new FormData();
       formData.append('id', itemToDelete);
-      await submit(formData, { method: 'delete' });
-      setModalActive(false);
-      setItemToDelete(null);
       
-      // Fetch the updated data after deletion
-      await headerData();
+      // Set the current page instantly before submitting
+      const newTotalItems = data.length - 1; // Decrease by 1 as one item is deleted
+      const newTotalPages = Math.ceil(newTotalItems / itemsPerPage);
       
-      // Calculate the new total pages
-      const newTotalPages = Math.ceil(data.length / itemsPerPage);
+      // Check if the current page will be empty after deletion
+      const isCurrentPageEmpty = currentItems.length === 1; // The current page will be empty after deletion if only one item was left
       
-      // If the current page is greater than the new total pages, set it to the last available page
-      if (currentPage > newTotalPages) {
+      if (isCurrentPageEmpty && currentPage > 1) {
+        // Redirect to the first page instantly
+        setCurrentPage(1);
+      } else if (currentPage > newTotalPages) {
+        // Set to the last available page
         setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
       }
       
+      await submit(formData, { method: 'delete' });
+      setModalActive(false);
+      setItemToDelete(null);
+  
+      // Fetch the updated data after adjusting the page
+      await headerData();
+  
       setIsLoading(false);
     }
   };
-
+  
+  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = Array.isArray(data) ? data.slice(indexOfFirstItem, indexOfLastItem) : [];
@@ -328,7 +338,7 @@ const Test = () => {
             content: 'Delete',
             onAction: handleConfirmDelete,
             destructive: true,
-            loading: isLoading
+            loading: isLoading,
           }}
           secondaryActions={[
             {

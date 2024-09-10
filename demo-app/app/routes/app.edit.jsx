@@ -8,7 +8,7 @@ import {
     PageActions,
     Toast,
     Frame,
-    
+    ContextualSaveBar
 } from "@shopify/polaris";
 import { useState, useEffect, useCallback } from 'react';
 import axios from "axios";
@@ -33,7 +33,7 @@ export const action = async ({ request }) => {
     try {
         // Update existing data via API call
         await axios.put(
-            `https://1222-110-225-99-87.ngrok-free.app/api/header/${id}`,
+            `https://62d8-110-227-227-11.ngrok-free.app/api/header/${id}`,
             {
                 title: value,
                 header: head,
@@ -63,7 +63,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch updated script data
-        const scriptData = await fetch(`https://1222-110-225-99-87.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://62d8-110-227-227-11.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -109,6 +109,8 @@ const Edit = () => {
     const [active, setActive] = useState(false);
     const [valueError, setValueError] = useState('');
     const [headError, setHeadError] = useState('');
+    const [isDirty, setIsDirty] = useState(false);
+    const [initialData, setInitialData] = useState({});
     const navigate = useNavigate();
     const location = useLocation();
     const fetcher = useFetcher();
@@ -120,7 +122,7 @@ const Edit = () => {
         (async function fetchHeaderData() {
             try {
                 const response = await axios.get(
-                    `https://1222-110-225-99-87.ngrok-free.app/api/header/${id}`,
+                    `https://62d8-110-227-227-11.ngrok-free.app/api/header/${id}`,
                     {
                         headers: {
                             'ngrok-skip-browser-warning': 'true',
@@ -132,16 +134,30 @@ const Edit = () => {
                 setEditValue(headerData.title);
                 setEditBody(headerData.body);
                 setEditHead(headerData.header);
+                setInitialData({
+                    title: headerData.title,
+                    body: headerData.body,
+                    header: headerData.header,
+                });
             } catch (error) {
                 console.error("Error fetching header data:", error);
             }
         })();
     }, [id]);
 
+    useEffect(() => {
+        const isDataChanged = 
+            editValue !== initialData.title ||
+            editHead !== initialData.header ||
+            editBody !== initialData.body;
+        setIsDirty(isDataChanged);
+    }, [editValue, editHead, editBody, initialData]);
+
     // Show toast on successful update
     useEffect(() => {
         if (fetcher.state === "idle" && fetcher.data?.success) {
             setActive(true);
+            setIsDirty(false);
 
             // Navigate to /app/display_data after 1.5 seconds
             const timeoutId = setTimeout(() => {
@@ -153,21 +169,63 @@ const Edit = () => {
         }
     }, [fetcher, navigate]);
 
+    // const handleSubmit = (event) => {
+    //     if (!editValue) {
+    //         setValueError('Subject Title is required');
+    //         event.preventDefault();
+    //         return;
+    //     }
+    //     if (!editHead) {
+    //         setHeadError('Code in the header is required');
+    //         event.preventDefault();
+    //         return;
+    //     }
+    //     // Use fetcher to handle the form submission
+    //     fetcher.submit(event.currentTarget, { method: "post" });
+    // };
+
     const handleSubmit = (event) => {
+        event.preventDefault();
+        if (validateForm()) {
+            submitForm();
+        }
+    };
+
+    const validateForm = () => {
+        let isValid = true;
         if (!editValue) {
             setValueError('Subject Title is required');
-            event.preventDefault();
-            return;
+            isValid = false;
+        } else {
+            setValueError('');
         }
         if (!editHead) {
             setHeadError('Code in the header is required');
-            event.preventDefault();
-            return;
+            isValid = false;
+        } else {
+            setHeadError('');
         }
-        // Use fetcher to handle the form submission
-        fetcher.submit(event.currentTarget, { method: "post" });
+        return isValid;
+    };
+    const submitForm = () => {
+        const formData = new FormData();
+        formData.append('value', editValue);
+        formData.append('head', editHead);
+        formData.append('body', editBody);
+        formData.append('id', id);
+        formData.append('shopName', location?.state?.shopName);
+
+        fetcher.submit(formData, { method: "post" });
     };
 
+    const handleDiscard = () => {
+        setEditValue(initialData.title);
+        setEditHead(initialData.header);
+        setEditBody(initialData.body);
+        setIsDirty(false);
+        navigate('/app/display_data');
+    };
+    
     const toggleActive = useCallback(() => setActive((active) => !active), []);
     const toastMarkup = active ? <Toast content="Update Data Successfully" onDismiss={toggleActive} /> : null;
 
@@ -175,6 +233,19 @@ const Edit = () => {
 
     return (
         <Frame>
+               {isDirty && (
+                <ContextualSaveBar
+                    message="Unsaved changes"
+                    saveAction={{
+                        onAction: submitForm,
+                        loading: fetcher.state === "submitting",
+                        disabled: fetcher.state === "submitting",
+                    }}
+                    discardAction={{
+                        onAction: handleDiscard,
+                    }}
+                />
+            )}
             <Page backAction={{ content: 'Settings', onAction: back }} title="Edit Code">
                 <fetcher.Form method="post" onSubmit={handleSubmit}>
                     <Layout>
