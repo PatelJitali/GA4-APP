@@ -58,7 +58,7 @@ export const action = async ({ request }) => {
                 }
             }
         `);
-        
+
         const responseBody = await response.json();
         const shopData = responseBody.data.shop;
 
@@ -146,7 +146,7 @@ const Edit = () => {
     }, [id]);
 
     useEffect(() => {
-        const isDataChanged = 
+        const isDataChanged =
             editValue !== initialData.title ||
             editHead !== initialData.header ||
             editBody !== initialData.body;
@@ -225,7 +225,7 @@ const Edit = () => {
         setIsDirty(false);
         navigate('/app/display_data');
     };
-    
+
     const toggleActive = useCallback(() => setActive((active) => !active), []);
     const toastMarkup = active ? <Toast content="Update Data Successfully" onDismiss={toggleActive} /> : null;
 
@@ -233,7 +233,7 @@ const Edit = () => {
 
     return (
         <Frame>
-               {isDirty && (
+            {isDirty && (
                 <ContextualSaveBar
                     message="Unsaved changes"
                     saveAction={{
@@ -256,10 +256,15 @@ const Edit = () => {
                                     value={editValue}
                                     onChange={(value) => {
                                         setEditValue(value);
-                                        if (value) setValueError('');
+                                        if (value) setValueError('');  // Clear error on change
+                                    }}
+                                    onBlur={() => {
+                                        if (!editValue) {
+                                            setValueError('Subject Title is required');  // Validate on blur
+                                        }
                                     }}
                                     autoComplete="off"
-                                    error={valueError}
+                                    error={valueError}  // Show error if present
                                     name="value"
                                 />
                             </Card>
@@ -271,12 +276,17 @@ const Edit = () => {
                                     value={editHead}
                                     onChange={(value) => {
                                         setEditHead(value);
-                                        if (value) setHeadError('');
+                                        if (value) setHeadError('');  // Clear error on change
+                                    }}
+                                    onBlur={() => {
+                                        if (!editHead) {
+                                            setHeadError('Code in the header is required');  // Validate on blur
+                                        }
                                     }}
                                     multiline={14}
                                     helpText="The code will be printed in the <head> section."
                                     autoComplete="off"
-                                    error={headError}
+                                    error={headError}  // Show error if present
                                     name="head"
                                 />
                             </Card>
