@@ -3,7 +3,7 @@
 client_id = "6b85e612339033c6a3edfd075642ff9e"
 name = "GA4 App"
 handle = "ga4-app-2"
-application_url = "https://funk-pursuant-storage-wonderful.trycloudflare.com"
+application_url = "https://her-civilian-sophisticated-initially.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_themes,write_themes"
 
 [auth]
 redirect_urls = [
-  "https://funk-pursuant-storage-wonderful.trycloudflare.com/auth/callback",
-  "https://funk-pursuant-storage-wonderful.trycloudflare.com/auth/shopify/callback",
-  "https://funk-pursuant-storage-wonderful.trycloudflare.com/api/auth/callback"
+  "https://her-civilian-sophisticated-initially.trycloudflare.com/auth/callback",
+  "https://her-civilian-sophisticated-initially.trycloudflare.com/auth/shopify/callback",
+  "https://her-civilian-sophisticated-initially.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

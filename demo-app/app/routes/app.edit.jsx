@@ -14,6 +14,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from "axios";
 import { authenticate } from "../shopify.server";
 import { json } from "@remix-run/node";
+import React from "react";
 
 export const loader = async ({ request }) => {
     const { session } = await authenticate.admin(request);
@@ -33,7 +34,7 @@ export const action = async ({ request }) => {
     try {
         // Update existing data via API call
         await axios.put(
-            `https://62d8-110-227-227-11.ngrok-free.app/api/header/${id}`,
+            `https://7843-122-170-77-62.ngrok-free.app/api/header/${id}`,
             {
                 title: value,
                 header: head,
@@ -63,7 +64,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch updated script data
-        const scriptData = await fetch(`https://62d8-110-227-227-11.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://7843-122-170-77-62.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -122,7 +123,7 @@ const Edit = () => {
         (async function fetchHeaderData() {
             try {
                 const response = await axios.get(
-                    `https://62d8-110-227-227-11.ngrok-free.app/api/header/${id}`,
+                    `https://7843-122-170-77-62.ngrok-free.app/api/header/${id}`,
                     {
                         headers: {
                             'ngrok-skip-browser-warning': 'true',
@@ -194,13 +195,13 @@ const Edit = () => {
     const validateForm = () => {
         let isValid = true;
         if (!editValue) {
-            setValueError('Subject Title is required');
+            setValueError('Subject is required');
             isValid = false;
         } else {
             setValueError('');
         }
         if (!editHead) {
-            setHeadError('Code in the header is required');
+            setHeadError('header is required');
             isValid = false;
         } else {
             setHeadError('');
@@ -252,7 +253,11 @@ const Edit = () => {
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Subject Title"
+                                     label={
+                                        <React.Fragment>
+                                            Subject Title <span style={{ color: 'red' }}>*</span>
+                                        </React.Fragment>
+                                    }
                                     value={editValue}
                                     onChange={(value) => {
                                         setEditValue(value);
@@ -272,7 +277,11 @@ const Edit = () => {
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Code in the header"
+                                   label={
+                                    <React.Fragment>
+                                        Code For header <span style={{ color: 'red' }}>*</span>
+                                    </React.Fragment>
+                                }
                                     value={editHead}
                                     onChange={(value) => {
                                         setEditHead(value);
@@ -284,7 +293,6 @@ const Edit = () => {
                                         }
                                     }}
                                     multiline={14}
-                                    helpText="The code will be printed in the <head> section."
                                     autoComplete="off"
                                     error={headError}  // Show error if present
                                     name="head"
@@ -294,11 +302,10 @@ const Edit = () => {
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Code in the body (optional)"
+                                    label="Code for body"
                                     value={editBody}
                                     onChange={(value) => setEditBody(value)}
                                     multiline={14}
-                                    helpText="The code will be printed above the </body> tag."
                                     autoComplete="off"
                                     name="body"
                                 />

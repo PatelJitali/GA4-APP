@@ -1,15 +1,15 @@
-import { useNavigate, useActionData, Form, useSubmit  } from "@remix-run/react";
-import { Button, Card, Page, TextField, Layout, PageActions, Toast, Frame, ContextualSaveBar  } from "@shopify/polaris";
+import { useNavigate, useActionData, Form, useSubmit } from "@remix-run/react";
+import { Button, Card, Page, TextField, Layout, PageActions, Toast, Frame, ContextualSaveBar } from "@shopify/polaris";
 import { useState, useEffect, useCallback } from 'react';
 import React from "react";
 import axios from "axios";
 import { useLoaderData } from "@remix-run/react";
-import { authenticate } from "../shopify.server";   
+import { authenticate } from "../shopify.server";
 import { json } from "@remix-run/node";
 
 export const loader = async ({ request }) => {
     const { session } = await authenticate.admin(request);
-    return session ;
+    return session;
 };
 
 export const action = async ({ request }) => {
@@ -24,7 +24,7 @@ export const action = async ({ request }) => {
     try {
         // Your existing API call
         const headerData = await axios.post(
-            `https://62d8-110-227-227-11.ngrok-free.app/api/header`,
+            `https://7843-122-170-77-62.ngrok-free.app/api/header`,
             {
                 title: value,
                 header: head,
@@ -50,12 +50,12 @@ export const action = async ({ request }) => {
                 }
             }
         `);
-        
+
         const responseBody = await response.json();
         const shopData = responseBody.data.shop;
 
         // Fetch script data
-        const scriptData = await fetch(`https://62d8-110-227-227-11.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://7843-122-170-77-62.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -95,8 +95,8 @@ export const action = async ({ request }) => {
 };
 
 const Test = () => {
-    const  shopName1  = useLoaderData();
-    const actionData = useActionData();    
+    const shopName1 = useLoaderData();
+    const actionData = useActionData();
     const navigate = useNavigate();
     const submit = useSubmit();
     const [value, setValue] = useState('');
@@ -112,7 +112,7 @@ const Test = () => {
     const toggleActive = useCallback(() => {
         setActive((active) => !active);
     }, []);
-   
+
     useEffect(() => {
         if (actionData?.success) {
             setActive(true);
@@ -130,7 +130,7 @@ const Test = () => {
     }, []); // Set initial data only once when component mounts
 
     useEffect(() => {
-        const isDataChanged = 
+        const isDataChanged =
             value !== initialData.value ||
             head !== initialData.head ||
             body !== initialData.body;
@@ -141,17 +141,17 @@ const Test = () => {
         <Toast content="Insert Data Successfully" onDismiss={toggleActive} />
     ) : null;
 
-   
+
     function validateForm() {
         let isValid = true;
         if (!value) {
-            setValueError('Subject Title is required');
+            setValueError('Subject is required');
             isValid = false;
         } else {
             setValueError('');
         }
         if (!head) {
-            setHeadError('Code in the header is required');
+            setHeadError('header is required');
             isValid = false;
         } else {
             setHeadError('');
@@ -214,7 +214,11 @@ const Test = () => {
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Subject Title"
+                                    label={
+                                        <React.Fragment>
+                                            Subject Title <span style={{ color: 'red' }}>*</span>
+                                        </React.Fragment>
+                                    }
                                     value={value}
                                     onChange={(newValue) => {
                                         setValue(newValue);
@@ -229,28 +233,31 @@ const Test = () => {
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Code in the header"
+                                    label={
+                                        <React.Fragment>
+                                            Code For header <span style={{ color: 'red' }}>*</span>
+                                        </React.Fragment>
+                                    }
                                     value={head}
                                     onChange={(newValue) => {
                                         setHead(newValue);
                                         if (newValue) setHeadError('');
                                     }}
                                     multiline={14}
-                                    helpText="The code will be printed in the <head> section."
                                     autoComplete="off"
                                     error={headError}
                                     name="head"
                                 />
                             </Card>
                         </Layout.Section>
+
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Code in the body (optional)"
+                                    label="Code for body"
                                     value={body}
                                     onChange={(newValue) => setBody(newValue)}
                                     multiline={14}
-                                    helpText="The code will be printed above the </body> tag."
                                     autoComplete="off"
                                     name="body"
                                 />
@@ -265,7 +272,7 @@ const Test = () => {
                 </Form>
             </Page>
             {toastMarkup}
-            
+
         </Frame>
     );
 };
