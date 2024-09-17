@@ -24,7 +24,7 @@ export const action = async ({ request }) => {
     try {
         // Your existing API call
         const headerData = await axios.post(
-            `https://7843-122-170-77-62.ngrok-free.app/api/header`,
+            `https://463d-122-181-122-48.ngrok-free.app/api/header`,
             {
                 title: value,
                 header: head,
@@ -55,7 +55,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch script data
-        const scriptData = await fetch(`https://7843-122-170-77-62.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://463d-122-181-122-48.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -106,8 +106,15 @@ const Test = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [valueError, setValueError] = useState('');
     const [headError, setHeadError] = useState('');
+    const [bodyError, setBodyError] = useState('');
     const [isDirty, setIsDirty] = useState(false);
     const [initialData, setInitialData] = useState({ value: '', head: '', body: '' });
+
+    // Toast states for error messages
+    const [valueErrorToast, setValueErrorToast] = useState(false);
+    const [headErrorToast, setHeadErrorToast] = useState(false);
+    const [bodyErrorToast, setBodyErrorToast] = useState(false);
+    
 
     const toggleActive = useCallback(() => {
         setActive((active) => !active);
@@ -137,27 +144,49 @@ const Test = () => {
         setIsDirty(isDataChanged);
     }, [value, head, body, initialData]);
 
+    // Toast components for errors
+    const valueErrorToastMarkup = valueErrorToast ? (
+        <Toast content="Subject Title is required" error onDismiss={() => setValueErrorToast(false)} />
+      ) : null;      
+
+    const headErrorToastMarkup = headErrorToast ? (
+        <Toast content="Either header or body is required" error onDismiss={() => setHeadErrorToast(false)} />
+    ) : null;
+
+    const bodyErrorToastMarkup = bodyErrorToast ? (
+        <Toast content="Either header or body is required" error onDismiss={() => setBodyErrorToast(false)} />
+    ) : null;
+
     const toastMarkup = active ? (
         <Toast content="Insert Data Successfully" onDismiss={toggleActive} />
     ) : null;
 
 
-    function validateForm() {
-        let isValid = true;
+       // Validate form and trigger toasts on errors
+       function validateForm() {
+        // Validate the 'value' field (Subject)
         if (!value) {
-            setValueError('Subject is required');
-            isValid = false;
-        } else {
-            setValueError('');
+            setValueError('');  // Do not show "Subject is required" inline error
+            setValueErrorToast(true);  // Trigger toast for value error
+            return false;
         }
-        if (!head) {
-            setHeadError('header is required');
-            isValid = false;
+    
+        // Validate 'header' and 'body' with OR condition
+        if (!head && !body) {
+            setHeadError('Either header or body is required');
+            setBodyError('Either header or body is required');
+            setHeadErrorToast(true);  // Trigger toast for head error
+            return false;
         } else {
             setHeadError('');
+            setBodyError('');
         }
-        return isValid;
+    
+        return true;
     }
+    
+    
+    
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -184,6 +213,7 @@ const Test = () => {
         setHead(initialData.head);
         setBody(initialData.body);
         setIsDirty(false);
+        navigate('/app/display_data');
     }
 
     function back() {
@@ -191,9 +221,17 @@ const Test = () => {
     }
 
     return (
-        <Frame>
+      
+       <Frame
+            logo={{
+                width: 86,
+                contextualSaveBarSource:
+                    'https://cdn.shopify.com/s/files/1/2376/3301/files/Shopify_Secondary_Inverted.png',
+            }}
+        >
             {isDirty && (
                 <ContextualSaveBar
+                    fullWidth
                     message="Unsaved changes"
                     saveAction={{
                         onAction: handleSave,
@@ -205,60 +243,76 @@ const Test = () => {
                     }}
                 />
             )}
+
+
             <Page
                 backAction={{ content: 'Settings', onAction: back }}
                 title={`Add New Code`}
             >
                 <Form method="post" onSubmit={handleSubmit}>
                     <Layout>
-                        <Layout.Section>
-                            <Card roundedAbove="sm">
-                                <TextField
-                                    label={
-                                        <React.Fragment>
-                                            Subject Title <span style={{ color: 'red' }}>*</span>
-                                        </React.Fragment>
-                                    }
-                                    value={value}
-                                    onChange={(newValue) => {
-                                        setValue(newValue);
-                                        if (newValue) setValueError('');
-                                    }}
-                                    autoComplete="off"
-                                    error={valueError}
-                                    name="value"
-                                />
-                            </Card>
-                        </Layout.Section>
-                        <Layout.Section>
-                            <Card roundedAbove="sm">
-                                <TextField
-                                    label={
-                                        <React.Fragment>
-                                            Code For header <span style={{ color: 'red' }}>*</span>
-                                        </React.Fragment>
-                                    }
-                                    value={head}
-                                    onChange={(newValue) => {
-                                        setHead(newValue);
-                                        if (newValue) setHeadError('');
-                                    }}
-                                    multiline={14}
-                                    autoComplete="off"
-                                    error={headError}
-                                    name="head"
-                                />
-                            </Card>
-                        </Layout.Section>
+                    <Layout.Section>
+                        <Card roundedAbove="sm">
+                        <TextField
+  label={
+    <React.Fragment>
+      Subject Title <span style={{ color: 'red' }}>*</span>
+    </React.Fragment>
+  }
+  value={value}
+  onChange={(newValue) => {
+    if (newValue.length > 80) {
+      setValueError('Subject Title cannot exceed 80 characters');  // Set the inline error
+      setValueErrorToast(false);  // Disable toast for character error
+    } else {
+      setValue(newValue);
+      setValueError('');  // Clear inline error if valid
+    }
+  }}
+  error={valueError}  // Show inline error only for character limit
+  autoComplete="off"
+  name="value"
+/>
+
+                        </Card>
+                    </Layout.Section>
 
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Code for body"
-                                    value={body}
-                                    onChange={(newValue) => setBody(newValue)}
+                                    label="Code For header"                                       
+                                    value={head}
+                                    onChange={(newValue) => {
+                                        setHead(newValue);
+                                        if (newValue || body) { // If header or body is filled, clear both errors
+                                            setHeadError('');
+                                            setBodyError('');
+                                        }
+                                    }}
                                     multiline={14}
+                                    helpText="This code will be printed in the <head> section."
                                     autoComplete="off"
+                                 
+                                    name="head"
+                                />
+                            </Card>
+                        </Layout.Section>
+                        <Layout.Section>
+                            <Card roundedAbove="sm">
+                                <TextField
+                                    label="Code For body"
+                                    value={body}
+                                    onChange={(newValue) => {
+                                        setBody(newValue);
+                                        if (newValue || head) { // If body or header is filled, clear both errors
+                                            setBodyError('');
+                                            setHeadError('');
+                                        }
+                                    }}
+                                    multiline={14}
+                                     helpText="This code will be printed above the </body> tag."
+                                    autoComplete="off"
+                                   
                                     name="body"
                                 />
                             </Card>
@@ -271,9 +325,16 @@ const Test = () => {
                     </Layout>
                 </Form>
             </Page>
+             {/* Error Toasts */}
+             {valueErrorToastMarkup}
+            {headErrorToastMarkup}
+            {bodyErrorToastMarkup}
+
+            {/* Success Toast */}
             {toastMarkup}
 
-        </Frame>
+     </Frame>
+    
     );
 };
 

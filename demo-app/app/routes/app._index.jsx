@@ -137,9 +137,7 @@ export default function FirstPagePage() {
                 <Box paddingBlockStart="100">
                   <InlineStack align="center">
                     <Text as="p" variant="bodyLg">
-                      Track and analyze user behavior across your website 
-                      and app with ScriptInjector for advanced 
-                      insights and optimization.
+                     Enhance Your Storefront with Flexible Script Integration
                     </Text>
                   </InlineStack>
                 </Box>

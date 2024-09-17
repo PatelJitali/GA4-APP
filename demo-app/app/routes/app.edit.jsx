@@ -34,7 +34,7 @@ export const action = async ({ request }) => {
     try {
         // Update existing data via API call
         await axios.put(
-            `https://7843-122-170-77-62.ngrok-free.app/api/header/${id}`,
+            `https://463d-122-181-122-48.ngrok-free.app/api/header/${id}`,
             {
                 title: value,
                 header: head,
@@ -64,7 +64,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch updated script data
-        const scriptData = await fetch(`https://7843-122-170-77-62.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://463d-122-181-122-48.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -110,7 +110,9 @@ const Edit = () => {
     const [active, setActive] = useState(false);
     const [valueError, setValueError] = useState('');
     const [headError, setHeadError] = useState('');
+    const [bodyError, setBodyError] = useState('');
     const [isDirty, setIsDirty] = useState(false);
+    const [isLoading, setIsLoading] = useState(true); // Loading state
     const [initialData, setInitialData] = useState({});
     const navigate = useNavigate();
     const location = useLocation();
@@ -118,12 +120,17 @@ const Edit = () => {
 
     let id = location?.state?.id;
 
+    // Toast states for error messages
+    const [valueErrorToast, setValueErrorToast] = useState(false);
+    const [headErrorToast, setHeadErrorToast] = useState(false);
+    const [bodyErrorToast, setBodyErrorToast] = useState(false);
+
     // Preload header data
     useEffect(() => {
         (async function fetchHeaderData() {
             try {
                 const response = await axios.get(
-                    `https://7843-122-170-77-62.ngrok-free.app/api/header/${id}`,
+                    `https://463d-122-181-122-48.ngrok-free.app/api/header/${id}`,
                     {
                         headers: {
                             'ngrok-skip-browser-warning': 'true',
@@ -140,18 +147,22 @@ const Edit = () => {
                     body: headerData.body,
                     header: headerData.header,
                 });
+                setIsLoading(false);
             } catch (error) {
                 console.error("Error fetching header data:", error);
+                setIsLoading(false);
             }
         })();
     }, [id]);
 
     useEffect(() => {
-        const isDataChanged =
-            editValue !== initialData.title ||
-            editHead !== initialData.header ||
-            editBody !== initialData.body;
-        setIsDirty(isDataChanged);
+        if (!isLoading) {
+            const isDataChanged =
+                editValue !== initialData.title ||
+                editHead !== initialData.header ||
+                editBody !== initialData.body;
+            setIsDirty(isDataChanged);
+        }
     }, [editValue, editHead, editBody, initialData]);
 
     // Show toast on successful update
@@ -169,45 +180,63 @@ const Edit = () => {
             return () => clearTimeout(timeoutId); // Clean up timeout
         }
     }, [fetcher, navigate]);
+    
 
-    // const handleSubmit = (event) => {
-    //     if (!editValue) {
-    //         setValueError('Subject Title is required');
-    //         event.preventDefault();
-    //         return;
-    //     }
-    //     if (!editHead) {
-    //         setHeadError('Code in the header is required');
-    //         event.preventDefault();
-    //         return;
-    //     }
-    //     // Use fetcher to handle the form submission
-    //     fetcher.submit(event.currentTarget, { method: "post" });
-    // };
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        if (validateForm()) {
-            submitForm();
+    const handleChange = (setter) => (value) => {
+        if (value.length > 80) {
+            setValueError('Subject Title cannot exceed 80 characters'); // Show inline error for length
+            setValueErrorToast(false); // Ensure toast is not shown for length constraint
+        } else if (!value.trim()) {
+            // Only set toast error if it's empty; avoid showing inline error for required
+            setValueError(''); // Clear inline error if value is valid
+            setValueErrorToast(true); // Show toast for required
+        } else {
+            setter(value);
+            setValueError(''); // Clear the inline error for valid input
+            setValueErrorToast(false); // Hide toast if the input is valid
         }
     };
 
+    
     const validateForm = () => {
         let isValid = true;
-        if (!editValue) {
-            setValueError('Subject is required');
+    
+        // Check if the 'value' field is empty
+        if (!editValue.trim()) {
+            // Only show toast for required error, not inline error
+            setValueError(''); 
+            setValueErrorToast(true); // Show toast for "Subject Title is required"
+            isValid = false;
+        } else if (editValue.length > 80) {
+            setValueError('Subject Title cannot exceed 80 characters'); // Show inline error
+            setValueErrorToast(false); // Ensure toast is not shown for length constraint
             isValid = false;
         } else {
-            setValueError('');
+            setValueError(''); // Clear inline error
+            setValueErrorToast(false); // Hide toast if the input is valid
         }
-        if (!editHead) {
-            setHeadError('header is required');
+    
+        // Check if both 'head' and 'body' are empty
+        if (!editHead.trim() && !editBody.trim()) {
+            setHeadError('Either header or body is required');
+            setHeadErrorToast(true); // Show toast error
             isValid = false;
         } else {
-            setHeadError('');
+            setHeadError(''); // Clear error
+            setBodyError(''); // Clear error
+            setHeadErrorToast(false); // Hide toast
         }
+    
         return isValid;
     };
+    
+const handleSubmit = (event) => {
+    event.preventDefault();
+    if (validateForm()) {
+        submitForm();
+    }
+};
+
     const submitForm = () => {
         const formData = new FormData();
         formData.append('value', editValue);
@@ -228,12 +257,31 @@ const Edit = () => {
     };
 
     const toggleActive = useCallback(() => setActive((active) => !active), []);
+
+    // Toast components for errors
+    const valueErrorToastMarkup = valueErrorToast ? (
+        <Toast content="Subject Title is required" error onDismiss={() => setValueErrorToast(false)} />
+    ) : null;
+
+    const headErrorToastMarkup = headErrorToast ? (
+        <Toast content="Either header or body is required" error onDismiss={() => setHeadErrorToast(false)} />
+    ) : null;
+
+    const bodyErrorToastMarkup = bodyErrorToast ? (
+        <Toast content="Either header or body is required" error onDismiss={() => setBodyErrorToast(false)} />
+    ) : null;
+
+
     const toastMarkup = active ? <Toast content="Update Data Successfully" onDismiss={toggleActive} /> : null;
 
     const back = () => navigate('/app/display_data');
-
     return (
-        <Frame>
+        <Frame
+            logo={{
+                width: 86,
+                contextualSaveBarSource:
+                    'https://cdn.shopify.com/s/files/1/2376/3301/files/Shopify_Secondary_Inverted.png',
+            }}>
             {isDirty && (
                 <ContextualSaveBar
                     message="Unsaved changes"
@@ -253,35 +301,30 @@ const Edit = () => {
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                     label={
+                                    label={
                                         <React.Fragment>
                                             Subject Title <span style={{ color: 'red' }}>*</span>
                                         </React.Fragment>
                                     }
                                     value={editValue}
-                                    onChange={(value) => {
-                                        setEditValue(value);
-                                        if (value) setValueError('');  // Clear error on change
-                                    }}
+                                    onChange={handleChange(setEditValue)}
                                     onBlur={() => {
                                         if (!editValue) {
-                                            setValueError('Subject Title is required');  // Validate on blur
+                                            setValueError('');  // Don't show inline error for required
+                                            setValueErrorToast(true);  // Trigger the toast for required field
                                         }
                                     }}
+                                    error={valueError}  // Show inline error if the character limit exceeds
                                     autoComplete="off"
-                                    error={valueError}  // Show error if present
                                     name="value"
                                 />
+
                             </Card>
                         </Layout.Section>
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                   label={
-                                    <React.Fragment>
-                                        Code For header <span style={{ color: 'red' }}>*</span>
-                                    </React.Fragment>
-                                }
+                                    label="Code For header"
                                     value={editHead}
                                     onChange={(value) => {
                                         setEditHead(value);
@@ -293,8 +336,9 @@ const Edit = () => {
                                         }
                                     }}
                                     multiline={14}
+                                    helpText="This code will be printed in the <head> section."
                                     autoComplete="off"
-                                    error={headError}  // Show error if present
+
                                     name="head"
                                 />
                             </Card>
@@ -302,10 +346,11 @@ const Edit = () => {
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Code for body"
+                                    label="Code For body"
                                     value={editBody}
                                     onChange={(value) => setEditBody(value)}
                                     multiline={14}
+                                    helpText="This code will be printed above the </body> tag."
                                     autoComplete="off"
                                     name="body"
                                 />
@@ -320,7 +365,11 @@ const Edit = () => {
                     </Layout>
                 </fetcher.Form>
             </Page>
+            {valueErrorToastMarkup}
+            {headErrorToastMarkup}
+            {bodyErrorToastMarkup}
             {toastMarkup}
+
         </Frame>
     );
 };

@@ -24,7 +24,6 @@ import { DeleteIcon, EditIcon } from '@shopify/polaris-icons';
 import { authenticate } from "../shopify.server";
 import { json } from "@remix-run/node";
 
-
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
   return session;
@@ -41,7 +40,7 @@ export const action = async ({ request }) => {
   const id = formData.get("id");
 
   try {
-    await axios.delete(`https://7843-122-170-77-62.ngrok-free.app/api/header/${id}`, {
+    await axios.delete(`https://463d-122-181-122-48.ngrok-free.app/api/header/${id}`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'x-api-key': 'abcdefg',
@@ -63,7 +62,7 @@ export const action = async ({ request }) => {
   const shopData = responseBody.data.shop;
 
   // Fetch updated script data
-  const scriptData = await fetch(`https://7843-122-170-77-62.ngrok-free.app/api/header?storename=${session.shop}`, {
+  const scriptData = await fetch(`https://463d-122-181-122-48.ngrok-free.app/api/header?storename=${session.shop}`, {
       headers: {
           'ngrok-skip-browser-warning': 'true',
           'x-api-key': 'abcdefg',
@@ -107,6 +106,20 @@ export const action = async ({ request }) => {
   }
 };
 
+// Helper Functions for Local Storage
+const setBannerDismissed = (hours) => {
+  const expiryTime = new Date().getTime() + hours * 60 * 60 * 1000; // Current time + specified hours
+  localStorage.setItem("bannerDismissedExpiry", expiryTime);
+};
+
+const isBannerDismissed = () => {
+  const expiryTime = localStorage.getItem("bannerDismissedExpiry");
+  if (!expiryTime) return false;
+
+  // Check if the expiry time is in the future
+  return new Date().getTime() < expiryTime;
+};
+
 
 const Test = () => {
   const shopName1 = useLoaderData();
@@ -123,6 +136,17 @@ const Test = () => {
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
   
+  useEffect(() => {
+    const bannerDismissed = isBannerDismissed();
+    if (bannerDismissed) {
+      setShowBanner(false); // Hide banner if it has been dismissed within the last 24 hours
+    }
+  }, []);
+
+  const handleBannerDismiss = () => {
+    setBannerDismissed(24); // Set the banner dismissal for 24 hours
+    setShowBanner(false); // Hide the banner
+  };
 
   useEffect(() => {
     window.globalShopName = shopName1.shop;
@@ -150,7 +174,7 @@ const Test = () => {
   async function headerData() {
     try {
       const response = await axios.get(
-        `https://7843-122-170-77-62.ngrok-free.app/api/header?storename=${shopName1.shop}`,
+        `https://463d-122-181-122-48.ngrok-free.app/api/header?storename=${shopName1.shop}`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true',
@@ -217,20 +241,25 @@ const Test = () => {
     }
   };
   
-  
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = Array.isArray(data) ? data.slice(indexOfFirstItem, indexOfLastItem) : [];
 
-  const rows = Array.isArray(currentItems) ? currentItems.map(item => [
-    <Text variant="bodyMd">{item.title}</Text>,
-    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+  const rows = Array.isArray(currentItems) 
+  ? currentItems.map((item, index) => [
+    <div style={{ padding: '15px'}}>
+      <Text variant="bodyMd">{item.title}</Text>
+    </div>,
+    <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '15px' }}>
       <ButtonGroup variant="segmented">
         <Button size="slim" icon={EditIcon} onClick={() => handleEdit(item._id)}>Edit</Button>
-        <Button size="slim" icon={DeleteIcon} onClick={() => handleDeleteClick(item._id)} destructive>Delete</Button>
+        <Button variant="primary" tone="critical" size="slim" icon={DeleteIcon} onClick={() => handleDeleteClick(item._id)} destructive>Delete</Button>
       </ButtonGroup>
     </div>
-  ]) : [];
+  
+  ]) 
+  : [];
+
 
   const toggleToastActive = useCallback(() => setToastActive((active) => !active), []);
 
@@ -247,7 +276,7 @@ const Test = () => {
           <Layout.Section>
             <InlineStack align="space-between">
               <Text variant="headingXl" as="h4" alignment="start">
-                Display Data
+              Script Injector Codes
               </Text>
               <Button variant="primary" onClick={() => navigate("/app/insert_data")}>
                 Add Script
@@ -258,7 +287,7 @@ const Test = () => {
             {showBanner && (
               <Banner
                 title="Enable App Embed"
-                onDismiss={() => setShowBanner(false)}
+                onDismiss={handleBannerDismiss}
               >
                 <InlineStack align="space-between">
                   <Box>
@@ -267,6 +296,7 @@ const Test = () => {
                       customization.
                     </Text>
                   </Box>
+                  
                   <Box>
                     <Button
                       url={`https://${shopName1.shop}/admin/themes/current/editor?context=apps`}
@@ -296,11 +326,13 @@ const Test = () => {
                     columnContentTypes={[
                       'text',
                       'text',
-                      'text',
+                    
                     ]}
                     headings={[
-                      <Text variant="bodyMd" fontWeight="bold">Title</Text>,
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+                      <div style={{ paddingLeft: '15px' }}>
+                      <Text variant="bodyMd" fontWeight="bold">Title</Text>
+                    </div>,
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' , paddingRight: '70px'}}>
                         <Text variant="bodyMd" fontWeight="bold">Action</Text>
                       </div>,
                     ]}
@@ -312,7 +344,8 @@ const Test = () => {
                     <div style={{
                       display: 'flex',
                       justifyContent: 'center',
-                      padding: '16px 0'
+                      padding: '16px 0',
+                        borderTop: 'solid 1px rgb(233 222 222)'
                     }}>
                       <Pagination
                         label={`Page ${currentPage} of ${totalPages}`}
