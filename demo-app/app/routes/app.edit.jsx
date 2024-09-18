@@ -47,9 +47,10 @@ export const action = async ({ request }) => {
                 },
             }
         );
-        console.log(":headerResponse",headerResponse)
+        
+        console.log("new-res",headerResponse)
 
-        if (headerResponse.status !== 201) {
+        if (headerResponse.status !== 200) {
             throw new Error(`Failed to update header: ${headerResponse.statusText}`);
         }
 
@@ -102,11 +103,8 @@ export const action = async ({ request }) => {
         `);
 
         return json({ success: true });
-    } catch (error) {
+    } catch (error) { 
         console.error(error);
-        if (error.message.includes("Failed to update header")) {
-            return json({ success: false, error: "Subject title already exists" });
-        }
         return json({ success: false, error: error.message });
     }
 };
@@ -188,9 +186,11 @@ const Edit = () => {
                 }, 1500);
 
                 return () => clearTimeout(timeoutId);
-            } else if (fetcher.data?.error) {
+            }
+            if (fetcher.data?.error) {
                 setBackendErrorMessage(fetcher.data.error);
                 setBackendErrorToast(true);
+                setIsLoading(false);
             }
         }
     }, [fetcher, navigate]);
