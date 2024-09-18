@@ -33,7 +33,7 @@ export const action = async ({ request }) => {
 
     try {
         // Update existing data via API call
-        await axios.put(
+        const headerResponse = await axios.put(
             `https://04e4-110-226-29-110.ngrok-free.app/api/header/${id}`,
             {
                 title: value,
@@ -47,6 +47,11 @@ export const action = async ({ request }) => {
                 },
             }
         );
+        console.log(":headerResponse",headerResponse)
+
+        if (headerResponse.status !== 201) {
+            throw new Error(`Failed to update header: ${headerResponse.statusText}`);
+        }
 
         // Fetch shop data
         const response = await admin.graphql(`
@@ -99,6 +104,9 @@ export const action = async ({ request }) => {
         return json({ success: true });
     } catch (error) {
         console.error(error);
+        if (error.message.includes("Failed to update header")) {
+            return json({ success: false, error: "Subject title already exists" });
+        }
         return json({ success: false, error: error.message });
     }
 };
@@ -124,6 +132,8 @@ const Edit = () => {
     const [valueErrorToast, setValueErrorToast] = useState(false);
     const [headErrorToast, setHeadErrorToast] = useState(false);
     const [bodyErrorToast, setBodyErrorToast] = useState(false);
+    const [backendErrorToast, setBackendErrorToast] = useState(false);
+    const [backendErrorMessage, setBackendErrorMessage] = useState('');
 
     // Preload header data
     useEffect(() => {
@@ -167,22 +177,27 @@ const Edit = () => {
 
     // Show toast on successful update
     useEffect(() => {
-        if (fetcher.state === "idle" && fetcher.data?.success) {
-            setActive(true);
-            setIsDirty(false);
+        if (fetcher.state === "idle") {
+            if (fetcher.data?.success) {
+                setActive(true);
+                setIsDirty(false);
 
-            // Navigate to /app/display_data after 1.5 seconds
-            const timeoutId = setTimeout(() => {
-                setActive(false);
-                navigate('/app/display_data');
-            }, 1500);
+                const timeoutId = setTimeout(() => {
+                    setActive(false);
+                    navigate('/app/display_data');
+                }, 1500);
 
-            return () => clearTimeout(timeoutId); // Clean up timeout
+                return () => clearTimeout(timeoutId);
+            } else if (fetcher.data?.error) {
+                setBackendErrorMessage(fetcher.data.error);
+                setBackendErrorToast(true);
+            }
         }
     }, [fetcher, navigate]);
     
 
-    const handleChange = (setter) => (value) => {
+    const handleChange = (value) => {
+        setEditValue(value);
         if (value.length > 80) {
             setValueError('Subject Title cannot exceed 80 characters'); // Show inline error for length
             setValueErrorToast(false); // Ensure toast is not shown for length constraint
@@ -191,7 +206,7 @@ const Edit = () => {
             setValueError(''); // Clear inline error if value is valid
             setValueErrorToast(true); // Show toast for required
         } else {
-            setter(value);
+
             setValueError(''); // Clear the inline error for valid input
             setValueErrorToast(false); // Hide toast if the input is valid
         }
@@ -201,6 +216,8 @@ const Edit = () => {
     const validateForm = () => {
         let isValid = true;
     
+
+        console.log("editValue",editValue)
         // Check if the 'value' field is empty
         if (!editValue.trim()) {
             // Only show toast for required error, not inline error
@@ -271,6 +288,9 @@ const handleSubmit = (event) => {
         <Toast content="Either header or body is required" error onDismiss={() => setBodyErrorToast(false)} />
     ) : null;
 
+    const backendErrorToastMarkup = backendErrorToast ? (
+        <Toast content='Subject title already exist' error onDismiss={() => setBackendErrorToast(false)} />
+    ) : null;
 
     const toastMarkup = active ? <Toast content="Update Data Successfully" onDismiss={toggleActive} /> : null;
 
@@ -286,7 +306,7 @@ const handleSubmit = (event) => {
                 <ContextualSaveBar
                     message="Unsaved changes"
                     saveAction={{
-                        onAction: submitForm,
+                        onAction: handleSubmit,
                         loading: fetcher.state === "submitting",
                         disabled: fetcher.state === "submitting",
                     }}
@@ -307,7 +327,11 @@ const handleSubmit = (event) => {
                                         </React.Fragment>
                                     }
                                     value={editValue}
-                                    onChange={handleChange(setEditValue)}
+                                    // onChange={handleChange(editValue)}
+                                    onChange={(editValue) => {
+                                        handleChange(editValue);
+                                    }}
+
                                     onBlur={() => {
                                         if (!editValue) {
                                             setValueError('');  // Don't show inline error for required
@@ -368,6 +392,7 @@ const handleSubmit = (event) => {
             {valueErrorToastMarkup}
             {headErrorToastMarkup}
             {bodyErrorToastMarkup}
+            {backendErrorToastMarkup}
             {toastMarkup}
 
         </Frame>

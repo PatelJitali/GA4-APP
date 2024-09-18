@@ -117,8 +117,6 @@ const Test = () => {
     const [valueErrorToast, setValueErrorToast] = useState(false);
     const [headErrorToast, setHeadErrorToast] = useState(false);
     const [bodyErrorToast, setBodyErrorToast] = useState(false);
-    
-
     const [backendErrorToast, setBackendErrorToast] = useState(false);
     const [backendErrorMessage, setBackendErrorMessage] = useState('');
 
@@ -157,11 +155,11 @@ const Test = () => {
     }, [value, head, body, initialData]);
 
 
-   
+
     // Toast components for errors
     const valueErrorToastMarkup = valueErrorToast ? (
         <Toast content="Subject Title is required" error onDismiss={() => setValueErrorToast(false)} />
-      ) : null;      
+    ) : null;
 
     const headErrorToastMarkup = headErrorToast ? (
         <Toast content="Either header or body is required" error onDismiss={() => setHeadErrorToast(false)} />
@@ -176,19 +174,19 @@ const Test = () => {
     ) : null;
 
     const backendErrorToastMarkup = backendErrorToast ? (
-        <Toast content= 'Subject title already exist' error onDismiss={() => setBackendErrorToast(false)} />
+        <Toast content='Subject title already exist' error onDismiss={() => setBackendErrorToast(false)} />
     ) : null;
 
 
-       // Validate form and trigger toasts on errors
-       function validateForm() {
+    // Validate form and trigger toasts on errors
+    function validateForm() {
         // Validate the 'value' field (Subject)
         if (!value) {
             setValueError('');  // Do not show "Subject is required" inline error
             setValueErrorToast(true);  // Trigger toast for value error
             return false;
         }
-    
+
         // Validate 'header' and 'body' with OR condition
         if (!head && !body) {
             setHeadError('Either header or body is required');
@@ -199,12 +197,12 @@ const Test = () => {
             setHeadError('');
             setBodyError('');
         }
-    
+
         return true;
     }
-    
-    
-    
+
+
+
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -239,8 +237,8 @@ const Test = () => {
     }
 
     return (
-      
-       <Frame
+
+        <Frame
             logo={{
                 width: 86,
                 contextualSaveBarSource:
@@ -269,36 +267,36 @@ const Test = () => {
             >
                 <Form method="post" onSubmit={handleSubmit}>
                     <Layout>
-                    <Layout.Section>
-                        <Card roundedAbove="sm">
-                        <TextField
-  label={
-    <React.Fragment>
-      Subject Title <span style={{ color: 'red' }}>*</span>
-    </React.Fragment>
-  }
-  value={value}
-  onChange={(newValue) => {
-    if (newValue.length > 80) {
-      setValueError('Subject Title cannot exceed 80 characters');  // Set the inline error
-      setValueErrorToast(false);  // Disable toast for character error
-    } else {
-      setValue(newValue);
-      setValueError('');  // Clear inline error if valid
-    }
-  }}
-  error={valueError}  // Show inline error only for character limit
-  autoComplete="off"
-  name="value"
-/>
+                        <Layout.Section>
+                            <Card roundedAbove="sm">
+                                <TextField
+                                    label={
+                                        <React.Fragment>
+                                            Subject Title <span style={{ color: 'red' }}>*</span>
+                                        </React.Fragment>
+                                    }
+                                    value={value}
+                                    onChange={(newValue) => {
+                                        if (newValue.length > 80) {
+                                            setValueError('Subject Title cannot exceed 80 characters');  // Set the inline error
+                                            setValueErrorToast(false);  // Disable toast for character error
+                                        } else {
+                                            setValue(newValue);
+                                            setValueError('');  // Clear inline error if valid
+                                        }
+                                    }}
+                                    error={valueError}  // Show inline error only for character limit
+                                    autoComplete="off"
+                                    name="value"
+                                />
 
-                        </Card>
-                    </Layout.Section>
+                            </Card>
+                        </Layout.Section>
 
                         <Layout.Section>
                             <Card roundedAbove="sm">
                                 <TextField
-                                    label="Code For header"                                       
+                                    label="Code For header"
                                     value={head}
                                     onChange={(newValue) => {
                                         setHead(newValue);
@@ -310,7 +308,7 @@ const Test = () => {
                                     multiline={14}
                                     helpText="This code will be printed in the <head> section."
                                     autoComplete="off"
-                                 
+
                                     name="head"
                                 />
                             </Card>
@@ -328,9 +326,9 @@ const Test = () => {
                                         }
                                     }}
                                     multiline={14}
-                                     helpText="This code will be printed above the </body> tag."
+                                    helpText="This code will be printed above the </body> tag."
                                     autoComplete="off"
-                                   
+
                                     name="body"
                                 />
                             </Card>
@@ -343,8 +341,8 @@ const Test = () => {
                     </Layout>
                 </Form>
             </Page>
-             {/* Error Toasts */}
-             {valueErrorToastMarkup}
+            {/* Error Toasts */}
+            {valueErrorToastMarkup}
             {headErrorToastMarkup}
             {bodyErrorToastMarkup}
             {backendErrorToastMarkup}
@@ -352,8 +350,8 @@ const Test = () => {
             {/* Success Toast */}
             {toastMarkup}
 
-     </Frame>
-    
+        </Frame>
+
     );
 };
 
