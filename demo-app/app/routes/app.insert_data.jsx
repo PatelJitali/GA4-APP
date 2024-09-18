@@ -23,8 +23,8 @@ export const action = async ({ request }) => {
 
     try {
         // Your existing API call
-        const headerData = await axios.post(
-            `https://463d-122-181-122-48.ngrok-free.app/api/header`,
+        const headerResponse = await axios.post(
+            `https://04e4-110-226-29-110.ngrok-free.app/api/header`,
             {
                 title: value,
                 header: head,
@@ -39,7 +39,10 @@ export const action = async ({ request }) => {
             }
         );
 
-        // Fetch shop data
+        if (headerResponse.status !== 201) {
+            throw new Error(`Failed to add header: ${headerResponse.statusText}`);
+        }
+
         const response = await admin.graphql(`
             query {
                 shop {
@@ -55,7 +58,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch script data
-        const scriptData = await fetch(`https://463d-122-181-122-48.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://04e4-110-226-29-110.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -116,6 +119,9 @@ const Test = () => {
     const [bodyErrorToast, setBodyErrorToast] = useState(false);
     
 
+    const [backendErrorToast, setBackendErrorToast] = useState(false);
+    const [backendErrorMessage, setBackendErrorMessage] = useState('');
+
     const toggleActive = useCallback(() => {
         setActive((active) => !active);
     }, []);
@@ -129,6 +135,12 @@ const Test = () => {
                 navigate('/app/display_data');
             }, 1500);
             return () => clearTimeout(timer);
+        }
+        if (actionData?.error) {
+            // Show backend error toast when an error is returned
+            setBackendErrorMessage(actionData.error);
+            setBackendErrorToast(true);
+            setIsLoading(false);
         }
     }, [actionData, navigate]);
 
@@ -144,6 +156,8 @@ const Test = () => {
         setIsDirty(isDataChanged);
     }, [value, head, body, initialData]);
 
+
+   
     // Toast components for errors
     const valueErrorToastMarkup = valueErrorToast ? (
         <Toast content="Subject Title is required" error onDismiss={() => setValueErrorToast(false)} />
@@ -159,6 +173,10 @@ const Test = () => {
 
     const toastMarkup = active ? (
         <Toast content="Insert Data Successfully" onDismiss={toggleActive} />
+    ) : null;
+
+    const backendErrorToastMarkup = backendErrorToast ? (
+        <Toast content= 'Subject title already exist' error onDismiss={() => setBackendErrorToast(false)} />
     ) : null;
 
 
@@ -329,6 +347,7 @@ const Test = () => {
              {valueErrorToastMarkup}
             {headErrorToastMarkup}
             {bodyErrorToastMarkup}
+            {backendErrorToastMarkup}
 
             {/* Success Toast */}
             {toastMarkup}

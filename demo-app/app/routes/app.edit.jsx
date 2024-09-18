@@ -34,7 +34,7 @@ export const action = async ({ request }) => {
     try {
         // Update existing data via API call
         await axios.put(
-            `https://463d-122-181-122-48.ngrok-free.app/api/header/${id}`,
+            `https://04e4-110-226-29-110.ngrok-free.app/api/header/${id}`,
             {
                 title: value,
                 header: head,
@@ -64,7 +64,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch updated script data
-        const scriptData = await fetch(`https://463d-122-181-122-48.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://04e4-110-226-29-110.ngrok-free.app/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -130,7 +130,7 @@ const Edit = () => {
         (async function fetchHeaderData() {
             try {
                 const response = await axios.get(
-                    `https://463d-122-181-122-48.ngrok-free.app/api/header/${id}`,
+                    `https://04e4-110-226-29-110.ngrok-free.app/api/header/${id}`,
                     {
                         headers: {
                             'ngrok-skip-browser-warning': 'true',
