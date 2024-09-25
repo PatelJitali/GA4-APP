@@ -34,11 +34,12 @@ export const action = async ({ request }) => {
     try {
         // Update existing data via API call
         const headerResponse = await axios.put(
-            `https://04e4-110-226-29-110.ngrok-free.app/api/header/${id}`,
+            `https://checklist.codecrewinfotech.com/api/header/${id}`,
             {
                 title: value,
                 header: head,
                 body: body,
+                storename:shopName
             },
             {
                 headers: {
@@ -70,7 +71,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch updated script data
-        const scriptData = await fetch(`https://04e4-110-226-29-110.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://checklist.codecrewinfotech.com/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -138,7 +139,7 @@ const Edit = () => {
         (async function fetchHeaderData() {
             try {
                 const response = await axios.get(
-                    `https://04e4-110-226-29-110.ngrok-free.app/api/header/${id}`,
+                    `https://checklist.codecrewinfotech.com/api/header/${id}`,
                     {
                         headers: {
                             'ngrok-skip-browser-warning': 'true',
@@ -304,6 +305,7 @@ const handleSubmit = (event) => {
             }}>
             {isDirty && (
                 <ContextualSaveBar
+                    
                     message="Unsaved changes"
                     saveAction={{
                         onAction: handleSubmit,

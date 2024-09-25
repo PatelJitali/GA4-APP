@@ -40,7 +40,7 @@ export const action = async ({ request }) => {
   const id = formData.get("id");
 
   try {
-    await axios.delete(`https://04e4-110-226-29-110.ngrok-free.app/api/header/${id}`, {
+    await axios.delete(`https://checklist.codecrewinfotech.com/api/header/${id}`, {
       headers: {
         'ngrok-skip-browser-warning': 'true',
         'x-api-key': 'abcdefg',
@@ -62,7 +62,7 @@ export const action = async ({ request }) => {
   const shopData = responseBody.data.shop;
 
   // Fetch updated script data
-  const scriptData = await fetch(`https://04e4-110-226-29-110.ngrok-free.app/api/header?storename=${session.shop}`, {
+  const scriptData = await fetch(`https://checklist.codecrewinfotech.com/api/header?storename=${session.shop}`, {
       headers: {
           'ngrok-skip-browser-warning': 'true',
           'x-api-key': 'abcdefg',
@@ -174,7 +174,7 @@ const Test = () => {
   async function headerData() {
     try {
       const response = await axios.get(
-        `https://04e4-110-226-29-110.ngrok-free.app/api/header?storename=${shopName1.shop}`,
+        `https://checklist.codecrewinfotech.com/api/header?storename=${shopName1.shop}`,
         {
           headers: {
             'ngrok-skip-browser-warning': 'true',

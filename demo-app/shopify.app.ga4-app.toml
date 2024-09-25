@@ -3,7 +3,7 @@
 client_id = "6b85e612339033c6a3edfd075642ff9e"
 name = "Scriptinjector"
 handle = "ga4-app-2"
-application_url = "https://bent-keeping-magic-accurately.trycloudflare.com"
+application_url = "https://thai-ports-elementary-horse.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "read_themes,write_themes"
 
 [auth]
 redirect_urls = [
-  "https://bent-keeping-magic-accurately.trycloudflare.com/auth/callback",
-  "https://bent-keeping-magic-accurately.trycloudflare.com/auth/shopify/callback",
-  "https://bent-keeping-magic-accurately.trycloudflare.com/api/auth/callback"
+  "https://thai-ports-elementary-horse.trycloudflare.com/auth/callback",
+  "https://thai-ports-elementary-horse.trycloudflare.com/auth/shopify/callback",
+  "https://thai-ports-elementary-horse.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

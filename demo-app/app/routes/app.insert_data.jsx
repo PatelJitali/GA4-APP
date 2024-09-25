@@ -24,7 +24,7 @@ export const action = async ({ request }) => {
     try {
         // Your existing API call
         const headerResponse = await axios.post(
-            `https://04e4-110-226-29-110.ngrok-free.app/api/header`,
+            `https://checklist.codecrewinfotech.com/api/header`,
             {
                 title: value,
                 header: head,
@@ -58,7 +58,7 @@ export const action = async ({ request }) => {
         const shopData = responseBody.data.shop;
 
         // Fetch script data
-        const scriptData = await fetch(`https://04e4-110-226-29-110.ngrok-free.app/api/header?storename=${shopName}`, {
+        const scriptData = await fetch(`https://checklist.codecrewinfotech.com/api/header?storename=${shopName}`, {
             headers: {
                 'ngrok-skip-browser-warning': 'true',
                 'x-api-key': 'abcdefg',
@@ -200,10 +200,6 @@ const Test = () => {
 
         return true;
     }
-
-
-
-
     function handleSubmit(event) {
         event.preventDefault();
         if (validateForm()) {
@@ -247,7 +243,7 @@ const Test = () => {
         >
             {isDirty && (
                 <ContextualSaveBar
-                    fullWidth
+                    
                     message="Unsaved changes"
                     saveAction={{
                         onAction: handleSave,
