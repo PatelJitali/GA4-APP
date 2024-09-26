@@ -89,7 +89,7 @@ export default function FirstPagePage() {
                         variant="headingXl"
                         style={{ display: "none" }}
                       >
-                        {shopOwnerName} 👋😊
+                        {shopOwnerName} 👋
                       </Text>
                     )}
                   </Box>
@@ -102,7 +102,12 @@ export default function FirstPagePage() {
                 <img
                   src={head_ScriptInjector}
                   alt="ScriptInjector"
-                  style={{ maxWidth: 100, height: 70, marginRight: "20px", borderRadius: "50%" }}
+                  style={{
+                    maxWidth: 100,
+                    height: 70,
+                    marginRight: "20px",
+                    borderRadius: "50%",
+                  }}
                 />
               </>
             </Box>
@@ -137,7 +142,7 @@ export default function FirstPagePage() {
                 <Box paddingBlockStart="100">
                   <InlineStack align="center">
                     <Text as="p" variant="bodyLg">
-                     Enhance Your Storefront with Flexible Script Integration
+                      Enhance Your Storefront with Flexible Script Integration
                     </Text>
                   </InlineStack>
                 </Box>
