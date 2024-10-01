@@ -14,9 +14,9 @@
       {%- elsif body_value contains '<link' -%}
         {{- body_value | strip -}}
       {%- else --%}
-      
+       <script>
           {{ body_value | strip  }}
-      
+       </script>
            {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
