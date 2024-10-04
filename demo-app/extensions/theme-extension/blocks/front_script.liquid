@@ -1,3 +1,4 @@
+<!-- Scriptinjector header start  -->
 {%- assign script_data = shop.metafields.custom-script.header-script -%}
 {%- if script_data != blank -%}
   {%- assign cleaned_script = script_data | replace: '\u003c', '<' | replace: '\u003e', '>'  | replace: '\t', '' | replace: '\"', '"' -%}
@@ -22,6 +23,8 @@
   
   {%- endfor -%}
 {%- endif -%}
+
+<!-- Scriptinjector header end  -->
 
 {% schema %}
 {

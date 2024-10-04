@@ -25,7 +25,53 @@ import { authenticate } from "../shopify.server";
 import { json } from "@remix-run/node";
 
 export const loader = async ({ request }) => {
-  const { session } = await authenticate.admin(request);
+  const { session, admin } = await authenticate.admin(request);
+  const response = await admin.graphql(`
+    query {
+        shop {
+            id
+            name
+            email
+            myshopifyDomain
+        }
+    }
+`);
+
+const responseBody = await response.json();
+const shopData = responseBody.data.shop;
+
+// Fetch updated script data
+const scriptData = await fetch(`https://checklist.codecrewinfotech.com/api/header?storename=${session.shop}`, {
+    headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'x-api-key': 'abcdefg',
+    },
+});
+
+if (!scriptData.ok) {
+    throw new Error(`HTTP error! status: ${scriptData.status}`);
+}
+
+const responseData = await scriptData.json();
+
+// Update metafield
+await admin.graphql(`
+    mutation {
+        metafieldsSet(metafields: [
+            {
+                ownerId: "${shopData.id}",  
+                namespace: "custom-script",
+                key: "header-script",
+                value: ${JSON.stringify(JSON.stringify(responseData))},
+                type: "json"
+            }
+        ]) {
+            metafields {
+                id
+            }
+        }
+    }
+`);
   return session;
 };
 
@@ -47,52 +93,7 @@ export const action = async ({ request }) => {
       }
     });
 
-    const response = await admin.graphql(`
-      query {
-          shop {
-              id
-              name
-              email
-              myshopifyDomain
-          }
-      }
-  `);
-  
-  const responseBody = await response.json();
-  const shopData = responseBody.data.shop;
-
-  // Fetch updated script data
-  const scriptData = await fetch(`https://checklist.codecrewinfotech.com/api/header?storename=${session.shop}`, {
-      headers: {
-          'ngrok-skip-browser-warning': 'true',
-          'x-api-key': 'abcdefg',
-      },
-  });
-
-  if (!scriptData.ok) {
-      throw new Error(`HTTP error! status: ${scriptData.status}`);
-  }
-
-  const responseData = await scriptData.json();
-
-  // Update metafield
-  await admin.graphql(`
-      mutation {
-          metafieldsSet(metafields: [
-              {
-                  ownerId: "${shopData.id}",  
-                  namespace: "custom-script",
-                  key: "header-script",
-                  value: ${JSON.stringify(JSON.stringify(responseData))},
-                  type: "json"
-              }
-          ]) {
-              metafields {
-                  id
-              }
-          }
-      }
-  `);
+    
 
     return json({ success: true });
 
@@ -196,11 +197,17 @@ const Test = () => {
     }
   }
 
+  // const handleEdit = (id) => {
+  //   navigate('/app/edit', {
+  //     state: { id: id }
+  //   });
+  // };
+
   const handleEdit = (id) => {
-    navigate('/app/edit', {
+    navigate(`/app/edit/${id}`, {
       state: { id: id }
     });
-  };
+};
 
    const handleDeleteClick = (id) => {
     setItemToDelete(id);

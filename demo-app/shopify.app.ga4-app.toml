@@ -3,7 +3,7 @@
 client_id = "6b85e612339033c6a3edfd075642ff9e"
 name = "Scriptinjector"
 handle = "ga4-app-2"
-application_url = "https://thai-ports-elementary-horse.trycloudflare.com"
+application_url = "https://colon-era-richardson-greetings.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "read_themes,write_themes"
 
 [auth]
 redirect_urls = [
-  "https://thai-ports-elementary-horse.trycloudflare.com/auth/callback",
-  "https://thai-ports-elementary-horse.trycloudflare.com/auth/shopify/callback",
-  "https://thai-ports-elementary-horse.trycloudflare.com/api/auth/callback"
+  "https://colon-era-richardson-greetings.trycloudflare.com/auth/callback",
+  "https://colon-era-richardson-greetings.trycloudflare.com/auth/shopify/callback",
+  "https://colon-era-richardson-greetings.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

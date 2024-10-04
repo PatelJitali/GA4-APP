@@ -15,6 +15,7 @@ import axios from "axios";
 import { authenticate } from "../shopify.server";
 import { json } from "@remix-run/node";
 import React from "react";
+import { useParams } from "@remix-run/react";
 
 export const loader = async ({ request }) => {
     const { session } = await authenticate.admin(request);
@@ -111,6 +112,7 @@ export const action = async ({ request }) => {
 };
 
 const Edit = () => {
+    const { id } = useParams(); // Extract the 'id' from the URL
     const [editValue, setEditValue] = useState('');
     const [editHead, setEditHead] = useState('');
     const [editBody, setEditBody] = useState('');
@@ -125,7 +127,7 @@ const Edit = () => {
     const location = useLocation();
     const fetcher = useFetcher();
 
-    let id = location?.state?.id;
+    // let id = location?.state?.id;
 
     // Toast states for error messages
     const [valueErrorToast, setValueErrorToast] = useState(false);
