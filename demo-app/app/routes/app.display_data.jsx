@@ -17,6 +17,8 @@ import {
   TextContainer,
   Toast,
   ButtonGroup,
+  Badge,
+  Grid
 } from "@shopify/polaris";
 import { useLoaderData, useNavigate, useLocation, useSubmit, useActionData } from "@remix-run/react";
 import axios from "axios";
@@ -26,6 +28,93 @@ import { json } from "@remix-run/node";
 
 export const loader = async ({ request }) => {
   const { session, admin } = await authenticate.admin(request);
+  console.log(session,"sessionnamre")
+  
+   const themeData = await fetch(`https://${session?.shop}/admin/api/2024-07/themes.json`, {
+    method: 'GET',
+    headers: {
+      'X-Shopify-Access-Token': session.accessToken,
+      'Content-Type': 'application/json',
+    },
+  });
+  
+  const result = await themeData.json();
+  
+  const activeTheme = result.themes.find((theme) => theme.role === 'main');
+  console.log(activeTheme,"activeTheme")
+  if (activeTheme) {
+    console.log("activeTheme.id;",activeTheme.id)
+    const themeData = await fetch(
+      `https://${session?.shop}/admin/api/2023-01/themes/${activeTheme.id}/assets.json?asset[key]=config/settings_data.json`,
+      {
+        method: 'GET',
+        headers: {
+          'X-Shopify-Access-Token': session.accessToken,
+        },
+      }
+    );
+  
+    const resultData = await themeData.json();
+    var appEmbedEnabled ;
+    var blockType ;
+    var appID;
+       if (resultData.asset && resultData.asset.value) {
+      const settingsData = JSON.parse(resultData.asset.value);
+      if(settingsData.current && settingsData.current.blocks){
+      Object.values(settingsData.current.blocks).forEach((block) => {
+        if ((block.type.includes('scriptinjector') && block.type.includes('front_script_body'))) {
+          const typeParts = block.type.split('/');
+           blockType = typeParts[typeParts.length - 2];
+           appID = typeParts[typeParts.length - 1];  
+          }else{
+          
+            appID = process.env.SHOPIFY_THEME_EXTENSION_ID;
+            console.log(appID,"appIDappID")
+            blockType = 'front_script_body';
+            appEmbedEnabled = false;
+          }
+        });
+        appEmbedEnabled = Object.values(settingsData.current.blocks).some(
+         (block) => (block.type.includes('scriptinjector') && block.type.includes('front_script_body')) && block.disabled === false
+      );
+    } else{
+      console.log(process.env.SHOPIFY_THEME_EXTENSION_ID,"envdata")
+      appID = process.env.SHOPIFY_THEME_EXTENSION_ID;
+      blockType = 'front_script_body';
+      appEmbedEnabled = false;
+    }
+  }
+  var headerappEmbedEnabled ;
+    var headerblockType ;
+    var headerappID;
+
+
+    if (resultData.asset && resultData.asset.value) {
+      const settingsData = JSON.parse(resultData.asset.value);
+      if(settingsData.current && settingsData.current.blocks){
+      Object.values(settingsData.current.blocks).forEach((block) => {
+        if ((block.type.includes('scriptinjector') && block.type.includes('front_script_header'))) {
+          const typeParts = block.type.split('/');
+           headerblockType = typeParts[typeParts.length - 2];
+           headerappID = typeParts[typeParts.length - 1]; 
+          }else{
+          
+            headerappID = process.env.SHOPIFY_THEME_EXTENSION_ID;
+           
+            headerblockType = 'front_script_header';
+            headerappEmbedEnabled = false;
+          }
+        });
+        headerappEmbedEnabled = Object.values(settingsData.current.blocks).some(
+         (block) => (block.type.includes('scriptinjector') && block.type.includes('front_script_header')) && block.disabled === false
+      );
+    } else{
+      headerappID = process.env.SHOPIFY_THEME_EXTENSION_ID;
+      headerblockType = 'front_script_header';
+      headerappEmbedEnabled = false;
+    }
+  }
+  }
   const response = await admin.graphql(`
     query {
         shop {
@@ -40,7 +129,6 @@ export const loader = async ({ request }) => {
 const responseBody = await response.json();
 const shopData = responseBody.data.shop;
 
-// Fetch updated script data
 const scriptData = await fetch(`https://checklist.codecrewinfotech.com/api/header?storename=${session.shop}`, {
     headers: {
         'ngrok-skip-browser-warning': 'true',
@@ -54,7 +142,6 @@ if (!scriptData.ok) {
 
 const responseData = await scriptData.json();
 
-// Update metafield
 await admin.graphql(`
     mutation {
         metafieldsSet(metafields: [
@@ -72,7 +159,15 @@ await admin.graphql(`
         }
     }
 `);
-  return session;
+return json({
+  ...session,
+  appEmbedEnabled,
+  headerappEmbedEnabled,
+  appID,
+  blockType,
+  headerappID,
+  headerblockType
+});
 };
 
 export const action = async ({ request }) => {
@@ -92,15 +187,7 @@ export const action = async ({ request }) => {
         'x-api-key': 'abcdefg',
       }
     });
-
-    
-
     return json({ success: true });
-
-
-    
-
-
   } catch (error) {
     console.error("Error deleting item:", error);
     return json({ success: false, error: error.message }, { status: 500 });
@@ -123,6 +210,9 @@ const isBannerDismissed = () => {
 
 
 const Test = () => {
+  const {appEmbedEnabled, headerappEmbedEnabled, appID,blockType,headerappID,headerblockType } = useLoaderData()
+  const [appEmbedStatus, setappEmbedStatus] = useState(appEmbedEnabled);
+  const [headerappEmbedStatus, setheaderappEmbedStatus] = useState(headerappEmbedEnabled);
   const shopName1 = useLoaderData();
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,6 +226,11 @@ const Test = () => {
   const [toastActive, setToastActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 5;
+
+  const shopNameParts = shopName1.shop.split('.')
+  const shopNameUrl = shopNameParts[0];
+  console.log(shopNameUrl,"shopNameUrl")
+
   
   useEffect(() => {
     const bannerDismissed = isBannerDismissed();
@@ -196,12 +291,6 @@ const Test = () => {
       setData([]); // Set to empty array to avoid map error
     }
   }
-
-  // const handleEdit = (id) => {
-  //   navigate('/app/edit', {
-  //     state: { id: id }
-  //   });
-  // };
 
   const handleEdit = (id) => {
     navigate(`/app/edit/${id}`, {
@@ -290,32 +379,62 @@ const Test = () => {
               </Button>
             </InlineStack>
           </Layout.Section>
-          <Layout.Section>
-            {showBanner && (
-              <Banner
-                title="Enable App Embed"
-                onDismiss={handleBannerDismiss}
-              >
-                <InlineStack align="space-between">
-                  <Box>
-                    <Text as="p">
-                      Please make sure that the app is enabled from the Shopify
-                      customization.
-                    </Text>
-                  </Box>
-                  
-                  <Box>
-                    <Button
-                      url={`https://${shopName1.shop}/admin/themes/current/editor?context=apps`}
-                      target="_blank"
-                    >
-                      Enable App Embed
-                    </Button>
-                  </Box>
-                </InlineStack>
-              </Banner>
-            )}
-          </Layout.Section>
+          
+          
+     
+    <Layout.Section>
+  <Grid>
+    {/* body embed */}
+    <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 6, xl: 6 }}>
+      {!appEmbedStatus && showBanner ? (
+        <LegacyCard title="App Embed for body" sectioned>
+          <Banner title="App embed is missing from live theme" tone="critical">
+                <Button
+                  url={`https://admin.shopify.com/store/${shopNameUrl}/themes/current/editor?context=apps&activateAppId=${appID}/${blockType}`}
+                  target="_blank"
+                >
+                  Enable App Embed
+                </Button>
+          </Banner>
+        </LegacyCard>
+      ) : (
+        appEmbedStatus && (
+          <LegacyCard title="App Embed for body" sectioned>
+            <Badge tone="success" progress="complete">
+              Activated
+            </Badge>
+          </LegacyCard>
+        )
+      )}
+    </Grid.Cell>
+
+   {/* header embed */}
+    <Grid.Cell columnSpan={{ xs: 6, sm: 3, md: 3, lg: 6, xl: 6 }}>
+      {!headerappEmbedStatus && showBanner ? (
+        <LegacyCard title="App Embed for header" sectioned>
+          <Banner title="App embed is missing from live theme" tone="critical">
+                <Button
+                  url={`https://admin.shopify.com/store/${shopNameUrl}/themes/current/editor?context=apps&activateAppId=${headerappID}/${headerblockType}`}
+                  target="_blank"
+                >
+                  Enable App Embed
+                </Button>
+          </Banner>
+        </LegacyCard>
+      ) : (
+        headerappEmbedStatus && (
+          <LegacyCard title="App Embed for header" sectioned>
+            <Badge tone="success" progress="complete">
+              Activated
+            </Badge>
+          </LegacyCard>
+        )
+      )}
+    </Grid.Cell>
+  </Grid>
+</Layout.Section>
+
+
           <Layout.Section>
             <LegacyCard>
               {data.length === 0 ? (
