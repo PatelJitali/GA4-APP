@@ -1,3 +1,4 @@
+<!-- Scriptinjector body start  -->
 {%- assign script_data = shop.metafields.custom-script.header-script -%}
 {%- if script_data != blank -%}
   {%- assign cleaned_script = script_data | replace: '\u003c', '<' | replace: '\u003e', '>'  | replace: '\t', '' | replace: '\"', '"' -%}
@@ -14,14 +15,14 @@
       {%- elsif body_value contains '<link' -%}
         {{- body_value | strip -}}
       {%- else --%}
-      
+       <script>
           {{ body_value | strip  }}
-      
+       </script>
            {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
 {%- endif -%}
-
+<!-- Scriptinjector body end  -->
 {% schema %}
 {
   "name": "ScriptInjector Body",

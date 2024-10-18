@@ -36,6 +36,7 @@
     "@shopify/shopify-app-session-storage": "^2.1.5",
     "@shopify/shopify-app-session-storage-prisma": "^4.0.5",
     "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "graphql": "^16.9.0",
     "graphql-request": "^7.1.0",
