@@ -10,25 +10,21 @@ export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
 
-  return json({ apiKey: process.env.SHOPIFY_API_KEY || "", shopDomain: session.shop });
+  return json({
+    apiKey: process.env.SHOPIFY_API_KEY || "",
+    shopDomain: session.shop,
+  });
 };
 
-
 export default function App() {
-
-  const { apiKey, shopDomain } = useLoaderData();
-  const regex = /^([^.]*)\./;
-  const match = regex.exec(shopDomain);
-  const subdomain = match[1];
-  // console.log(subdomain, ":::shopDomain:")
+  const { apiKey } = useLoaderData();
   return (
     <AppProvider isEmbeddedApp apiKey={apiKey}>
       <ui-nav-menu>
         <Link to="/app" rel="home">
           Home
         </Link>
-      
-        <Link to="/app/display_data">Configuration List</Link>    
+        <Link to="/app/display_data">Configuration List</Link>
       </ui-nav-menu>
       <Outlet />
     </AppProvider>

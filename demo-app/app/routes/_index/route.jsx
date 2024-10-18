@@ -21,32 +21,25 @@ export default function App() {
   return (
     <div className="index">
       <div className="content">
-        <h1>A short heading about [your app]</h1>
-        <p>A tagline about [your app] that describes your value proposition.</p>
+      <img
+          src="https://cdn.shopify.com/s/files/1/0656/2096/7579/files/ScriptInjector_New.png?v=1727415720"
+          alt="login_logo"
+          style={{ margin: "0 auto" }}
+          height="100"
+          width="100"
+        />
+        <h1>Welcome to ScripInjector App</h1>
+        <p>Enhance Your Storefront with Flexible Script Integration.</p>
         {showForm && (
           <Form method="post" action="/auth/login">
             <label>
-              <span>Shop domain</span>
+              <span className="labelSpan">Shop domain:</span>
               <input type="text" name="shop" />
               <span>e.g: my-shop-domain.myshopify.com</span>
             </label>
-            <button type="submit">Log in</button>
+            <button className={indexStyles.button} type="submit">Log in</button>
           </Form>
         )}
-        <ul>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-        </ul>
       </div>
     </div>
   );

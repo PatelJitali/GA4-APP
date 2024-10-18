@@ -1,7 +1,7 @@
 html,
 body {
-  height: 100%;
-  width: 100%;
+  /* height: 100%;
+  width: 100%; */
   font-family: "Roboto", sans-serif;
   line-height: 1.6;
 }
@@ -10,10 +10,21 @@ body {
   align-items: center;
   display: flex;
   justify-content: center;
-  height: 100%;
+  height: max-content;
   width: 100%;
   text-align: center;
-  padding: 1rem;
+  padding-top: 2rem;
+  font-family: math;
+}
+
+.content {
+  display: grid;
+  gap: 2rem;
+}
+
+img {
+  height: 100%;
+  width: 25%;
 }
 
 h1,
@@ -25,11 +36,6 @@ p {
 p {
   font-size: 1.2rem;
   padding-bottom: 2rem;
-}
-
-.content {
-  display: grid;
-  gap: 2rem;
 }
 
 form {
@@ -48,12 +54,36 @@ label {
   font-size: 1rem;
 }
 
+span.labelSpan {
+  font-weight: bold;
+}
+
 input[type="text"] {
-  padding: 0.4rem;
+  padding: 0.7rem;
+  border: 1px solid #000000;
+  border-radius: 5px;
 }
 
 button {
-  padding: 0.4rem;
+  padding: .7rem 1.5rem;
+  cursor: pointer;
+  color: #000;
+  font-weight: 700;
+  font-family: system-ui;
+  border-radius: 5px;
+  background-color: #fff;
+  border: 1px solid black;
+}
+
+button:hover {
+  padding: .7rem 1.5rem;
+  cursor: pointer;
+  color: #000;
+  font-weight: 700;
+  font-family: system-ui;
+  background: linear-gradient(white, white) padding-box, linear-gradient(to right, #548ee5, #1ce3db) border-box;
+  border-radius: 5px;
+  border: 2px solid transparent;
 }
 
 ul {
